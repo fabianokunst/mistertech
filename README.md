@@ -6,7 +6,7 @@ Reconstrução própria do site [mistertech.com.br](https://mistertech.com.br/) 
 
 | Ambiente | Onde | Endereço |
 |----------|------|----------|
-| Testes | GitHub Pages (branch `main`, raiz) | https://fabianokunst.github.io/mistertech/ |
+| Testes | GitHub Pages (workflow `.github/workflows/pages.yml`, compila `site/`) | https://fabianokunst.github.io/mistertech/ |
 | Produção | Hostinger (publicação manual, depois) | https://mistertech.com.br/ |
 
 ## Conteúdo
