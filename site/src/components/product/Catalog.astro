@@ -1,0 +1,235 @@
+---
+/**
+ * Catálogo: filtros por categoria (links para as páginas de categoria),
+ * busca instantânea e grade de produtos.
+ */
+import ProductCard from './ProductCard.astro';
+import Icon from '../ui/Icon.astro';
+import { categorias } from '../../data/categorias';
+import type { Produto } from '../../lib/produtos';
+import { url } from '../../lib/url';
+
+interface Props {
+  produtos: Produto[];
+  todos: Produto[];
+  /** Categoria ativa; vazio = "Todos". */
+  ativa?: string;
+}
+
+const { produtos, todos, ativa } = Astro.props;
+const filtros = [
+  { href: '/acessorios/', label: 'Todos', total: todos.length, ativo: !ativa },
+  ...categorias.map((c) => ({
+    href: `/${c.slug}/`,
+    label: c.nome,
+    total: todos.filter((p) => p.data.categoria === c.slug).length,
+    ativo: ativa === c.slug,
+  })),
+];
+---
+
+<div class="catalog" data-catalog>
+  <div class="catalog__toolbar">
+    <nav aria-label="Categorias">
+      <ul role="list" class="catalog__filters">
+        {
+          filtros.map((f) => (
+            <li>
+              <a href={url(f.href)} class="chip" aria-current={f.ativo ? 'page' : undefined}>
+                {f.label}
+                <span class="chip__count">{f.total}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="catalog__search">
+      <label for="busca-catalogo" class="visually-hidden">Buscar produto</label>
+      <Icon name="search" size={18} class="catalog__search-icon" />
+      <input id="busca-catalogo" type="search" placeholder="Buscar por nome, conexão, potência…" autocomplete="off" data-catalog-search />
+    </div>
+  </div>
+
+  <p class="catalog__status" role="status" aria-live="polite" data-catalog-status>
+    {produtos.length} {produtos.length === 1 ? 'produto' : 'produtos'}
+  </p>
+
+  <ul role="list" class="catalog__grid">
+    {
+      produtos.map((p, i) => (
+        <li>
+          <ProductCard produto={p} as="h2" eager={i < 4} />
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="catalog__empty" hidden data-catalog-empty>
+    <Icon name="search" size={32} />
+    <p><strong>Nenhum produto encontrado.</strong></p>
+    <p>Tente outro termo ou veja todas as categorias.</p>
+  </div>
+</div>
+
+<script>
+  const normalizar = (t: string) =>
+    t
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .trim();
+
+  document.querySelectorAll<HTMLElement>('[data-catalog]').forEach((catalogo) => {
+    const busca = catalogo.querySelector<HTMLInputElement>('[data-catalog-search]')!;
+    const status = catalogo.querySelector<HTMLElement>('[data-catalog-status]')!;
+    const vazio = catalogo.querySelector<HTMLElement>('[data-catalog-empty]')!;
+    const itens = [...catalogo.querySelectorAll<HTMLElement>('[data-produto]')];
+
+    busca.addEventListener('input', () => {
+      const termos = normalizar(busca.value).split(/\s+/).filter(Boolean);
+      let visiveis = 0;
+      for (const card of itens) {
+        const texto = card.dataset.busca ?? '';
+        const mostra = termos.every((t) => texto.includes(t));
+        card.parentElement!.hidden = !mostra;
+        if (mostra) visiveis++;
+      }
+      vazio.hidden = visiveis > 0;
+      status.textContent = `${visiveis} ${visiveis === 1 ? 'produto' : 'produtos'}`;
+    });
+  });
+</script>
+
+<style>
+  .catalog__toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  @media (min-width: 1024px) {
+    .catalog__toolbar {
+      grid-template-columns: minmax(0, 1fr) 340px;
+      align-items: center;
+    }
+  }
+
+  .catalog__filters {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding: 3px;
+    margin: -3px;
+    scrollbar-width: none;
+  }
+
+  .catalog__filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 40px;
+    padding: 0 var(--space-4);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out);
+  }
+
+  .chip:hover {
+    border-color: var(--color-text);
+  }
+
+  .chip[aria-current='page'] {
+    background: var(--ink-950);
+    border-color: var(--ink-950);
+    color: var(--ink-0);
+  }
+
+  .chip__count {
+    min-width: 1.5em;
+    padding: 0 0.4em;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-muted);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .chip[aria-current='page'] .chip__count {
+    background: var(--yellow-500);
+    color: var(--ink-950);
+  }
+
+  .catalog__search {
+    position: relative;
+  }
+
+  .catalog__search :global(.catalog__search-icon) {
+    position: absolute;
+    left: var(--space-4);
+    top: 50%;
+    translate: 0 -50%;
+    color: var(--color-text-subtle);
+    pointer-events: none;
+  }
+
+  .catalog__search input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 var(--space-4) 0 calc(var(--space-4) + 26px);
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+  }
+
+  .catalog__search input:focus-visible {
+    outline: none;
+    border-color: var(--color-focus);
+    box-shadow: var(--shadow-focus);
+  }
+
+  .catalog__status {
+    margin-bottom: var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  .catalog__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+    gap: var(--space-5);
+  }
+
+  .catalog__grid li[hidden] {
+    display: none;
+  }
+
+  .catalog__empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    padding: var(--space-16) var(--space-4);
+    text-align: center;
+    color: var(--color-text-muted);
+    border: 1.5px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+  }
+
+  .catalog__empty[hidden] {
+    display: none;
+  }
+</style>

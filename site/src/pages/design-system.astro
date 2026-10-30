@@ -1,0 +1,720 @@
+---
+/**
+ * Documentação viva do design system: tokens e componentes reais,
+ * renderizados com o mesmo código das páginas. Fora do sitemap (noindex).
+ */
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import Logo from '../components/layout/Logo.astro';
+import Button from '../components/ui/Button.astro';
+import Badge from '../components/ui/Badge.astro';
+import Icon from '../components/ui/Icon.astro';
+import Feature from '../components/ui/Feature.astro';
+import Notice from '../components/ui/Notice.astro';
+import Field from '../components/ui/Field.astro';
+import FaqItem from '../components/ui/FaqItem.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import ProductCard from '../components/product/ProductCard.astro';
+import CategoryCard from '../components/product/CategoryCard.astro';
+import StoreCard from '../components/product/StoreCard.astro';
+import SpecTable from '../components/product/SpecTable.astro';
+import { iconNames } from '../components/ui/icons';
+import simbolo from '../assets/marca/simbolo.png';
+import { categorias } from '../data/categorias';
+import { lojas } from '../data/lojas';
+import { getProdutos } from '../lib/produtos';
+
+const produtos = await getProdutos();
+const exemplo = produtos.find((p) => p.id === 'carregador-mistertech')!;
+const catExemplo = categorias[0];
+
+const escalas = [
+  {
+    nome: 'Amarelo (marca)',
+    prefixo: 'yellow',
+    tons: [
+      ['50', '#fffbea'],
+      ['100', '#fff3c4'],
+      ['200', '#ffe68a'],
+      ['300', '#ffd84d'],
+      ['400', '#ffd000'],
+      ['500', '#fdc300'],
+      ['600', '#e0a800'],
+      ['700', '#b38500'],
+      ['800', '#7a5b00'],
+      ['900', '#4d3900'],
+    ],
+  },
+  {
+    nome: 'Tinta (neutros)',
+    prefixo: 'ink',
+    tons: [
+      ['0', '#ffffff'],
+      ['50', '#f7f7f5'],
+      ['100', '#efeeec'],
+      ['200', '#e0dfdc'],
+      ['300', '#c4c3bf'],
+      ['400', '#9a9995'],
+      ['500', '#6f6e6b'],
+      ['600', '#4d4c4b'],
+      ['700', '#33332f'],
+      ['800', '#1f1f1d'],
+      ['900', '#141413'],
+      ['950', '#0b0b0a'],
+    ],
+  },
+];
+
+const semanticos = [
+  ['--color-bg', 'Fundo da página'],
+  ['--color-bg-subtle', 'Seções alternadas, cabeçalhos de página'],
+  ['--color-bg-muted', 'Etiquetas neutras, hover'],
+  ['--color-surface', 'Cards e painéis'],
+  ['--color-text', 'Texto principal e títulos'],
+  ['--color-text-muted', 'Texto de apoio'],
+  ['--color-text-subtle', 'Legendas e metadados'],
+  ['--color-border', 'Divisórias e contornos'],
+  ['--color-accent', 'Ação principal (amarelo da marca)'],
+  ['--color-action', 'Ação forte neutra (preto)'],
+  ['--color-success', 'Confirmações e garantia'],
+  ['--color-danger', 'Erros de formulário'],
+];
+
+const tipos = [
+  ['--text-4xl', 'Título de página', 'display'],
+  ['--text-3xl', 'Título de seção', 'display'],
+  ['--text-2xl', 'Subtítulo', 'display'],
+  ['--text-xl', 'Título de card', 'display'],
+  ['--text-lg', 'Texto de destaque (lead)', 'body'],
+  ['--text-md', 'Texto longo', 'body'],
+  ['--text-base', 'Texto padrão e controles', 'body'],
+  ['--text-sm', 'Apoio, etiquetas, navegação', 'body'],
+  ['--text-xs', 'Sobretítulos e contadores', 'body'],
+];
+
+const espacos = ['1', '2', '3', '4', '5', '6', '8', '10', '12', '16', '20', '24'];
+const raios = ['xs', 'sm', 'md', 'lg', 'xl', 'pill'];
+const sombras = ['xs', 'sm', 'md', 'lg'];
+
+const secoes = [
+  ['principios', 'Princípios'],
+  ['marca', 'Marca'],
+  ['cores', 'Cores'],
+  ['tipografia', 'Tipografia'],
+  ['espacamento', 'Espaçamento'],
+  ['forma', 'Raios e sombras'],
+  ['icones', 'Ícones'],
+  ['botoes', 'Botões'],
+  ['etiquetas', 'Etiquetas'],
+  ['formularios', 'Formulários'],
+  ['avisos', 'Avisos'],
+  ['conteudo', 'Conteúdo'],
+  ['cards', 'Cards'],
+];
+---
+
+<BaseLayout title="Design system" description="Tokens e componentes do site Mistertech." noindex>
+  <PageHeader
+    title="Design system Mistertech"
+    eyebrow="Guia de interface"
+    icon="pen-tool"
+    lead="Tokens e componentes usados em todo o site. Tudo nesta página é renderizado com o mesmo código das páginas reais — se mudar aqui, muda no site."
+    breadcrumbs={[{ label: 'Design system' }]}
+  >
+    <ul role="list" class="ds-toc">
+      {
+        secoes.map(([id, nome]) => (
+          <li>
+            <a href={`#${id}`}>{nome}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </PageHeader>
+
+  <div class="container ds">
+    <!-- Princípios -->
+    <section id="principios" class="ds-section">
+      <SectionHeader title="Princípios" lead="Três ideias guiam todas as decisões de interface." />
+      <ul role="list" class="ds-grid-3">
+        <li>
+          <Feature icon="zap" title="Marca em alto contraste">
+            Amarelo e preto fazem o trabalho pesado. O amarelo marca a ação principal e os detalhes de marca; o preto dá peso e
+            estrutura.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="sparkles" title="O produto em primeiro lugar">
+            Fotos em fundo branco, muito respiro e texto direto. Nada compete com o produto.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="shield-check" title="Acessível por padrão">
+            Contraste AA, foco visível, alvos de toque de 44 px, HTML semântico e respeito a “reduzir movimento”.
+          </Feature>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Marca -->
+    <section id="marca" class="ds-section">
+      <SectionHeader title="Marca" lead="Use o logotipo padrão em fundos claros e o negativo em fundos escuros. O símbolo “mt” serve para ícones e espaços pequenos." />
+      <div class="ds-grid-3">
+        <div class="ds-tile">
+          <div class="ds-tile__stage"><Logo link={false} height={32} /></div>
+          <p class="ds-caption"><code>&lt;Logo /&gt;</code> — fundos claros</p>
+        </div>
+        <div class="ds-tile">
+          <div class="ds-tile__stage ds-tile__stage--dark"><Logo variant="negativo" link={false} height={32} /></div>
+          <p class="ds-caption"><code>&lt;Logo variant="negativo" /&gt;</code> — fundos escuros</p>
+        </div>
+        <div class="ds-tile">
+          <div class="ds-tile__stage"><Image src={simbolo} alt="Símbolo mt" width={72} height={72} densities={[1, 2]} /></div>
+          <p class="ds-caption">Símbolo — favicon e avatar</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cores -->
+    <section id="cores" class="ds-section">
+      <SectionHeader
+        title="Cores"
+        lead="Duas escalas base e um conjunto de tokens semânticos. Componentes usam só os semânticos, por isso funcionam em seções claras, escuras (.theme-dark) e amarelas (.theme-accent)."
+      />
+      {
+        escalas.map((e) => (
+          <div class="ds-scale">
+            <h3 class="ds-h3">{e.nome}</h3>
+            <ul role="list" class="ds-swatches">
+              {e.tons.map(([tom, hex]) => (
+                <li>
+                  <span class="ds-swatch" style={`background: var(--${e.prefixo}-${tom})`} />
+                  <code>--{e.prefixo}-{tom}</code>
+                  <span class="ds-hex">{hex}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      <h3 class="ds-h3">Tokens semânticos</h3>
+      <div class="ds-themes">
+        {
+          ['', 'theme-dark', 'theme-accent'].map((tema) => (
+            <div class:list={['ds-theme', tema]}>
+              <p class="ds-theme__name">{tema ? `.${tema}` : 'Padrão (claro)'}</p>
+              <ul role="list" class="ds-tokens">
+                {semanticos.map(([token, uso]) => (
+                  <li>
+                    <span class="ds-chip" style={`background: var(${token})`} />
+                    <span>
+                      <code>{token}</code>
+                      <small>{uso}</small>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+      <Notice variant="accent" title="Amarelo sobre branco não passa em contraste">
+        Para texto amarelo em fundo claro use <code>--color-text-accent</code> (amarelo 800). O amarelo 500 é para fundos,
+        ícones sobre preto e botões com texto preto.
+      </Notice>
+    </section>
+
+    <!-- Tipografia -->
+    <section id="tipografia" class="ds-section">
+      <SectionHeader
+        title="Tipografia"
+        lead="Geometria (fonte da marca) nos títulos, com Outfit como alternativa livre; Lato nos textos. Tamanhos fluidos com clamp()."
+      />
+      <div class="ds-grid-2">
+        <div class="ds-tile ds-font">
+          <p class="ds-font__sample ds-font__sample--display">Aa</p>
+          <p><strong>--font-display</strong></p>
+          <p class="ds-caption">Geometria 400/500 · fallback Outfit 500</p>
+        </div>
+        <div class="ds-tile ds-font">
+          <p class="ds-font__sample">Aa</p>
+          <p><strong>--font-body</strong></p>
+          <p class="ds-caption">Lato 400/700</p>
+        </div>
+      </div>
+      <ul role="list" class="ds-type">
+        {
+          tipos.map(([token, uso, familia]) => (
+            <li>
+              <span class="ds-type__meta">
+                <code>{token}</code>
+                <small>{uso}</small>
+              </span>
+              <span
+                class="ds-type__sample"
+                style={`font-size: var(${token}); font-family: var(--font-${familia}); font-weight: ${familia === 'display' ? 500 : 400}`}
+              >
+                Carregador de parede 30 W
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="ds-tile">
+        <p class="eyebrow">.eyebrow — sobretítulo</p>
+        <h3 class="ds-h3">Título com h3</h3>
+        <p class="lead">.lead — texto de destaque com largura máxima de leitura.</p>
+        <div class="prose">
+          <p>.prose — blocos de texto longo com <a href="#tipografia">links sublinhados em amarelo</a> e <strong>ênfase</strong>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Espaçamento -->
+    <section id="espacamento" class="ds-section">
+      <SectionHeader title="Espaçamento" lead="Escala de 4 px. Seções usam --section-space (fluido) e as laterais usam --gutter." />
+      <ul role="list" class="ds-space">
+        {
+          espacos.map((s) => (
+            <li>
+              <code>--space-{s}</code>
+              <span class="ds-space__bar" style={`width: var(--space-${s})`} />
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Forma -->
+    <section id="forma" class="ds-section">
+      <SectionHeader title="Raios e sombras" lead="Cantos generosos e sombras suaves, quase sempre só no hover." />
+      <ul role="list" class="ds-shapes">
+        {
+          raios.map((r) => (
+            <li>
+              <span class="ds-shape" style={`border-radius: var(--radius-${r})`} />
+              <code>--radius-{r}</code>
+            </li>
+          ))
+        }
+      </ul>
+      <ul role="list" class="ds-shapes">
+        {
+          sombras.map((s) => (
+            <li>
+              <span class="ds-shape ds-shape--shadow" style={`box-shadow: var(--shadow-${s})`} />
+              <code>--shadow-{s}</code>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Ícones -->
+    <section id="icones" class="ds-section">
+      <SectionHeader title="Ícones" lead="Lucide, traço de 2 px. Decorativos por padrão; passe label quando o ícone for o único conteúdo de um botão." />
+      <ul role="list" class="ds-icons">
+        {
+          iconNames.map((n) => (
+            <li>
+              <Icon name={n} size={24} />
+              <code>{n}</code>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Botões -->
+    <section id="botoes" class="ds-section">
+      <SectionHeader title="Botões" lead="Primary para a ação principal da tela (uma por bloco). Secondary para ações fortes neutras, outline para alternativas e ghost para ações discretas." />
+      <div class="ds-stage">
+        <div class="cluster">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="outline">Outline</Button>
+          <Button variant="ghost">Ghost</Button>
+        </div>
+        <div class="cluster">
+          <Button size="sm" icon="arrow-right">Pequeno</Button>
+          <Button icon="arrow-right">Médio</Button>
+          <Button size="lg" icon="arrow-right">Grande</Button>
+          <Button variant="outline" icon="store" iconPosition="start">Com ícone</Button>
+          <Button href="https://www.iplace.com.br/" variant="outline" icon="arrow-up-right">Link externo</Button>
+        </div>
+      </div>
+      <div class="ds-stage theme-dark">
+        <div class="cluster">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="outline">Outline</Button>
+          <Button variant="ghost">Ghost</Button>
+        </div>
+        <p class="ds-caption">Dentro de <code>.theme-dark</code></p>
+      </div>
+      <div class="ds-stage theme-accent">
+        <div class="cluster">
+          <Button>Primary</Button>
+          <Button variant="outline">Outline</Button>
+        </div>
+        <p class="ds-caption">Dentro de <code>.theme-accent</code></p>
+      </div>
+    </section>
+
+    <!-- Etiquetas -->
+    <section id="etiquetas" class="ds-section">
+      <SectionHeader title="Etiquetas" lead="Para categorias, certificações e características curtas." />
+      <div class="ds-stage">
+        <div class="cluster">
+          <Badge>Neutral</Badge>
+          <Badge variant="accent" icon="zap">Accent</Badge>
+          <Badge variant="inverse">Inverse</Badge>
+          <Badge variant="outline">Outline</Badge>
+          <Badge variant="success" icon="circle-check">Success</Badge>
+          <Badge size="sm">Pequena</Badge>
+        </div>
+      </div>
+    </section>
+
+    <!-- Formulários -->
+    <section id="formularios" class="ds-section">
+      <SectionHeader title="Formulários" lead="Rótulo sempre visível, campos opcionais sinalizados, foco com halo amarelo e erro só depois da interação (:user-invalid)." />
+      <form class="ds-stage ds-form" onsubmit="return false">
+        <Field label="Nome" name="ds-nome" required autocomplete="off" />
+        <Field label="E-mail" name="ds-email" type="email" hint="Usamos só para responder." />
+        <Field label="Assunto" name="ds-assunto" as="select" options={['Dúvida', 'Troca']} />
+        <Field label="Mensagem" name="ds-mensagem" as="textarea" rows={3} />
+      </form>
+    </section>
+
+    <!-- Avisos -->
+    <section id="avisos" class="ds-section">
+      <SectionHeader title="Avisos" />
+      <div class="ds-stack">
+        <Notice title="Neutral">Informação complementar.</Notice>
+        <Notice variant="accent" icon="shield-check" title="Accent">Destaque de marca, como a garantia.</Notice>
+        <Notice variant="info" title="Info">Orientação ou dica.</Notice>
+        <Notice variant="success" title="Success">Confirmação de uma ação.</Notice>
+      </div>
+    </section>
+
+    <!-- Conteúdo -->
+    <section id="conteudo" class="ds-section">
+      <SectionHeader title="Conteúdo" lead="Acordeão nativo (funciona sem JavaScript) e ficha técnica." />
+      <div class="ds-grid-2">
+        <div>
+          <FaqItem pergunta="Qual é o prazo de garantia?" resposta="<p>12 meses contra defeitos de fabricação, sem cadastro.</p>" open />
+          <FaqItem pergunta="Onde compro os produtos?" resposta="<p>Na iPlace, na taQi e nos canais para empresas.</p>" />
+        </div>
+        <SpecTable rows={{ Entrada: '100–240 V~, 50/60 Hz', 'Potência máxima': '30 W', Peso: '63 g' }} />
+      </div>
+    </section>
+
+    <!-- Cards -->
+    <section id="cards" class="ds-section">
+      <SectionHeader title="Cards" lead="O card inteiro é clicável (link esticado no título) e ganha elevação no hover e foco." />
+      <ul role="list" class="ds-cards">
+        <li><ProductCard produto={exemplo} /></li>
+        <li>
+          <CategoryCard
+            categoria={catExemplo}
+            total={produtos.filter((p) => p.data.categoria === catExemplo.slug).length}
+            imagem={produtos.find((p) => p.id === catExemplo.capa)!.data.imagens[0]}
+          />
+        </li>
+        <li><StoreCard loja={lojas[0]} /></li>
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .ds-toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  .ds-toc a {
+    display: inline-flex;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .ds-toc a:hover {
+    border-color: var(--color-text);
+  }
+
+  .ds {
+    padding-bottom: var(--section-space);
+  }
+
+  .ds-section {
+    padding-top: var(--section-space);
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .ds-section :global(.section-header) {
+    margin-bottom: 0;
+  }
+
+  .ds-h3 {
+    font-size: var(--text-xl);
+  }
+
+  .ds-caption {
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .ds-grid-2,
+  .ds-grid-3 {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .ds-grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ds-grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .ds-tile {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .ds-tile__stage {
+    display: grid;
+    place-items: center;
+    min-height: 120px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-subtle);
+  }
+
+  .ds-tile__stage--dark {
+    background: var(--ink-950);
+  }
+
+  .ds-scale {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .ds-swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .ds-swatches li {
+    display: grid;
+    gap: 2px;
+    font-size: var(--text-xs);
+  }
+
+  .ds-swatch {
+    height: 56px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgb(0 0 0 / 0.08);
+    margin-bottom: var(--space-1);
+  }
+
+  .ds-hex {
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .ds-themes {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 1024px) {
+    .ds-themes {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .ds-theme {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .ds-theme__name {
+    margin-bottom: var(--space-4);
+    font-weight: var(--weight-bold);
+  }
+
+  .ds-tokens {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .ds-tokens li {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  .ds-tokens small {
+    display: block;
+    color: var(--color-text-subtle);
+    font-size: var(--text-xs);
+  }
+
+  .ds-chip {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-strong);
+  }
+
+  .ds-font__sample {
+    font-size: 4rem;
+    line-height: 1;
+  }
+
+  .ds-font__sample--display {
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+  }
+
+  .ds-type li {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 768px) {
+    .ds-type li {
+      grid-template-columns: 240px 1fr;
+      align-items: baseline;
+    }
+  }
+
+  .ds-type__meta small {
+    display: block;
+    color: var(--color-text-subtle);
+    font-size: var(--text-xs);
+  }
+
+  .ds-type__sample {
+    line-height: 1.15;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .ds-space {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .ds-space li {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    align-items: center;
+    font-size: var(--text-sm);
+  }
+
+  .ds-space__bar {
+    height: 16px;
+    border-radius: 3px;
+    background: var(--yellow-500);
+  }
+
+  .ds-shapes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+  }
+
+  .ds-shapes li {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+  }
+
+  .ds-shape {
+    width: 88px;
+    height: 88px;
+    background: var(--ink-950);
+  }
+
+  .ds-shape--shadow {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+  }
+
+  .ds-icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-2);
+  }
+
+  .ds-icons li {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-2);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-subtle);
+    font-size: var(--text-xs);
+    text-align: center;
+  }
+
+  .ds-stage {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .ds-stage.theme-dark,
+  .ds-stage.theme-accent {
+    border-color: transparent;
+  }
+
+  .ds-form {
+    max-width: 520px;
+  }
+
+  .ds-stack {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .ds-cards {
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    align-items: start;
+  }
+</style>

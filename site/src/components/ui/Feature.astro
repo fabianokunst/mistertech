@@ -1,0 +1,60 @@
+---
+/** Item de vantagem/benefício: ícone em bloco amarelo + título + texto. */
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  icon: IconName;
+  title: string;
+  as?: 'h2' | 'h3' | 'h4';
+  layout?: 'stacked' | 'inline';
+}
+
+const { icon, title, as: Tag = 'h3', layout = 'stacked' } = Astro.props;
+---
+
+<div class:list={['feature', `feature--${layout}`]}>
+  <span class="feature__icon"><Icon name={icon} size={24} /></span>
+  <div class="feature__body">
+    <Tag class="feature__title">{title}</Tag>
+    {
+      Astro.slots.has('default') && (
+        <p class="feature__text">
+          <slot />
+        </p>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .feature {
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  .feature--stacked {
+    flex-direction: column;
+  }
+
+  .feature__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--yellow-500);
+    color: var(--ink-950);
+  }
+
+  .feature__title {
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+  }
+
+  .feature__text {
+    margin-top: var(--space-2);
+    color: var(--color-text-muted);
+  }
+</style>

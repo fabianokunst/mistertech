@@ -1,0 +1,64 @@
+---
+/** Pergunta expansível (acordeão nativo com <details>, funciona sem JS). */
+import Icon from './Icon.astro';
+
+interface Props {
+  pergunta: string;
+  resposta: string; // HTML
+  open?: boolean;
+  name?: string; // agrupa: abrir um fecha os outros do mesmo grupo
+}
+
+const { pergunta, resposta, open = false, name } = Astro.props;
+---
+
+<details class="faq-item" open={open} name={name}>
+  <summary class="faq-item__summary">
+    <span>{pergunta}</span>
+    <Icon name="chevron-down" size={20} class="faq-item__chevron" />
+  </summary>
+  <div class="faq-item__answer prose" set:html={resposta} />
+</details>
+
+<style>
+  .faq-item {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .faq-item__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5) 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+    color: var(--color-text);
+  }
+
+  .faq-item__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item__summary:hover {
+    color: var(--color-text-muted);
+  }
+
+  .faq-item :global(.faq-item__chevron) {
+    transition: transform var(--duration-base) var(--ease-out);
+    color: var(--color-text-subtle);
+  }
+
+  .faq-item[open] :global(.faq-item__chevron) {
+    transform: rotate(180deg);
+  }
+
+  .faq-item__answer {
+    padding-bottom: var(--space-6);
+    max-width: 72ch;
+  }
+</style>

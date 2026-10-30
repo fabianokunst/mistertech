@@ -1,0 +1,350 @@
+---
+/**
+ * Trocas e garantia. Junta as antigas páginas "Política de trocas"
+ * (/policita-de-trocas/) e "Garantia estendida" (/garantia-estendida/),
+ * que redirecionam para cá.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import Icon from '../components/ui/Icon.astro';
+import Notice from '../components/ui/Notice.astro';
+import Button from '../components/ui/Button.astro';
+import HelpCta from '../components/sections/HelpCta.astro';
+import { site } from '../data/site';
+
+const indice = [
+  { id: 'garantia', titulo: 'Garantia de 12 meses' },
+  { id: 'como-acionar', titulo: 'Como pedir troca ou garantia' },
+  { id: 'defeito', titulo: 'Produto com defeito' },
+  { id: 'arrependimento', titulo: 'Desistência da compra' },
+  { id: 'recebimento', titulo: 'No momento da entrega' },
+];
+---
+
+<BaseLayout
+  title="Trocas e garantia"
+  description={`Todos os produtos Mistertech têm ${site.garantia.total} meses de garantia, sem cadastro. Veja como pedir troca, devolução ou acionar a garantia.`}
+  secao="/suporte-e-trocas/"
+>
+  <PageHeader
+    title="Trocas e garantia"
+    icon="refresh"
+    lead="Acidentes acontecem, né? Veja o que fazer se alguma coisa der errado com o seu produto Mistertech."
+    breadcrumbs={[{ label: 'Suporte e trocas', href: '/suporte-e-trocas/' }, { label: 'Trocas e garantia' }]}
+  />
+
+  <section class="section">
+    <div class="container policy">
+      <nav class="policy__toc" aria-label="Nesta página">
+        <p class="eyebrow">Nesta página</p>
+        <ol role="list">
+          {
+            indice.map((item) => (
+              <li>
+                <a href={`#${item.id}`}>{item.titulo}</a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <div class="policy__body">
+        <section id="garantia" class="policy__section">
+          <div class="warranty theme-dark">
+            <div class="warranty__number">
+              <span>{site.garantia.total}</span>
+              <small>meses</small>
+            </div>
+            <div class="warranty__text">
+              <h2>Garantia de {site.garantia.total} meses, sem cadastro</h2>
+              <p>
+                {`Todos os produtos Mistertech têm ${site.garantia.legal} meses de garantia legal + ${site.garantia.estendida} meses de garantia estendida contra defeitos de fabricação, contados a partir da emissão da nota fiscal.`}
+              </p>
+              <p>
+                O processo foi simplificado: <strong>não é mais preciso cadastrar o produto</strong> para ter a garantia
+                estendida. Basta guardar a nota fiscal.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="como-acionar" class="policy__section">
+          <h2>Como pedir troca ou garantia</h2>
+          <ol role="list" class="steps">
+            <li>
+              <span>
+                <strong>Leve o produto à loja onde comprou</strong> ou escreva para{' '}
+                <a href={`mailto:${site.email}`}>{site.email}</a>.
+              </span>
+            </li>
+            <li>
+              <span><strong>Tenha em mãos o produto e a nota fiscal</strong> (ou o cupom fiscal).</span>
+            </li>
+            <li>
+              <span>
+                <strong>Informe os dados da compra.</strong> Podemos pedir: dados do titular (nome, CPF e RG), endereço,
+                telefone e e-mail, número do pedido ou da nota fiscal e o motivo da troca.
+              </span>
+            </li>
+          </ol>
+          <Notice icon="clock">
+            A Mistertech tem até 30 dias corridos, a partir do recebimento do produto, para resolver a solicitação.
+          </Notice>
+        </section>
+
+        <section id="defeito" class="policy__section">
+          <h2>Produto com defeito</h2>
+          <div class="cards">
+            <div class="mini-card">
+              <p class="mini-card__tag">Até 7 dias corridos</p>
+              <p>
+                Comunique a troca à central de atendimento pelo e-mail <a href={`mailto:${site.email}`}>{site.email}</a>,
+                contando a partir do recebimento.
+              </p>
+            </div>
+            <div class="mini-card">
+              <p class="mini-card__tag">Depois de 7 dias</p>
+              <p>O atendimento segue os termos de garantia do produto. Escreva para o mesmo e-mail.</p>
+            </div>
+          </div>
+          <p class="text">
+            Para a devolução, o produto deve estar na embalagem original, com nota fiscal, manual e todos os acessórios. Todos
+            os produtos passam por análise e são devolvidos ao cliente se não houver defeito, se houver sinais de desgaste ou
+            se as orientações do manual de garantia não tiverem sido seguidas.
+          </p>
+        </section>
+
+        <section id="arrependimento" class="policy__section">
+          <h2>Desistência da compra</h2>
+          <p class="text">Você pode desistir da compra em até 7 dias corridos a partir do recebimento. O produto deve voltar:</p>
+          <ul role="list" class="checklist">
+            <li><Icon name="check" size={18} /> Na embalagem original, com o lacre intacto;</li>
+            <li><Icon name="check" size={18} /> Sem sinais de uso;</li>
+            <li><Icon name="check" size={18} /> Com nota fiscal, manual e todos os acessórios.</li>
+          </ul>
+        </section>
+
+        <section id="recebimento" class="policy__section">
+          <h2>No momento da entrega</h2>
+          <p class="text">Confira os itens e as quantidades do pedido. Recuse a entrega se encontrar:</p>
+          <ul role="list" class="checklist">
+            <li><Icon name="x" size={18} /> Embalagem aberta ou danificada;</li>
+            <li><Icon name="x" size={18} /> Produto danificado;</li>
+            <li><Icon name="x" size={18} /> Produto diferente do pedido;</li>
+            <li><Icon name="x" size={18} /> Falta de acessórios.</li>
+          </ul>
+          <p class="text">
+            Se mesmo assim receber o produto, fale com a gente em até 72 horas pelo e-mail{' '}
+            <a href={`mailto:${site.email}`}>{site.email}</a>.
+          </p>
+        </section>
+
+        <div class="cluster">
+          <Button href={`mailto:${site.email}`} icon="mail" iconPosition="start">Escrever para o atendimento</Button>
+          <Button href="/suporte-e-trocas/" variant="outline">Ver todas as dúvidas</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <HelpCta />
+</BaseLayout>
+
+<style>
+  .policy {
+    display: grid;
+    gap: var(--space-10);
+  }
+
+  @media (min-width: 1024px) {
+    .policy {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .policy__toc {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+
+  .policy__toc ol {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    border-left: 2px solid var(--color-border);
+  }
+
+  .policy__toc a {
+    display: block;
+    padding: var(--space-2) var(--space-4);
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .policy__toc a:hover {
+    color: var(--color-text);
+    border-left-color: var(--color-accent);
+  }
+
+  .policy__body {
+    display: grid;
+    gap: var(--space-16);
+    max-width: 780px;
+  }
+
+  .policy__section {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .policy__section h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .text {
+    color: var(--color-text-muted);
+    font-size: var(--text-md);
+  }
+
+  .warranty {
+    display: grid;
+    gap: var(--space-6);
+    padding: clamp(var(--space-6), 4vw, var(--space-10));
+    border-radius: var(--radius-xl);
+    align-items: center;
+  }
+
+  @media (min-width: 640px) {
+    .warranty {
+      grid-template-columns: auto 1fr;
+      gap: var(--space-10);
+    }
+  }
+
+  .warranty__number {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--yellow-500);
+    color: var(--ink-950);
+    font-family: var(--font-display);
+    line-height: 1;
+  }
+
+  .warranty__number span {
+    font-size: 3.5rem;
+    font-weight: var(--weight-medium);
+  }
+
+  .warranty__number small {
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .warranty__text {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .warranty__text h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .warranty__text p {
+    color: var(--color-text-muted);
+  }
+
+  .warranty__text strong {
+    color: var(--color-text);
+  }
+
+  .steps {
+    counter-reset: passo;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .steps li {
+    counter-increment: passo;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: var(--space-4);
+    align-items: start;
+    color: var(--color-text-muted);
+    font-size: var(--text-md);
+  }
+
+  .steps li > span {
+    padding-top: 4px;
+  }
+
+  .steps li::before {
+    content: counter(passo);
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ink-950);
+    color: var(--yellow-500);
+    font-weight: var(--weight-bold);
+  }
+
+  .steps strong {
+    color: var(--color-text);
+  }
+
+  .cards {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  }
+
+  .mini-card {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+  }
+
+  .mini-card__tag {
+    font-weight: var(--weight-bold);
+    color: var(--color-text);
+  }
+
+  .checklist {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  .checklist :global(.icon) {
+    padding: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+  }
+</style>

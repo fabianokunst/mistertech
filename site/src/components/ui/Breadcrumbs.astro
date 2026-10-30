@@ -1,0 +1,71 @@
+---
+/** Trilha de navegação + dados estruturados BreadcrumbList. */
+import Icon from './Icon.astro';
+import { absoluteUrl, url } from '../../lib/url';
+
+interface Props {
+  items: { label: string; href?: string }[];
+}
+
+const items = [{ label: 'Início', href: '/' }, ...Astro.props.items];
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.label,
+    ...(item.href ? { item: absoluteUrl(item.href, Astro.site) } : {}),
+  })),
+};
+---
+
+<nav class="breadcrumbs" aria-label="Você está aqui">
+  <ol role="list">
+    {
+      items.map((item, i) => (
+        <li>
+          {i > 0 && <Icon name="chevron-right" size={14} class="breadcrumbs__sep" />}
+          {item.href && i < items.length - 1 ? (
+            <a href={url(item.href)}>{item.label}</a>
+          ) : (
+            <span aria-current="page">{item.label}</span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+<style>
+  .breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  .breadcrumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .breadcrumbs a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+
+  .breadcrumbs [aria-current] {
+    color: var(--color-text);
+    font-weight: var(--weight-bold);
+  }
+</style>

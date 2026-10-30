@@ -1,0 +1,47 @@
+---
+/**
+ * Ícone do design system. Decorativo por padrão (aria-hidden);
+ * passe `label` quando o ícone for o único conteúdo de um controle.
+ */
+import { brandIcons, lucideIcons, type IconName } from './icons';
+
+interface Props {
+  name: IconName;
+  size?: number;
+  label?: string;
+  class?: string;
+  strokeWidth?: number;
+}
+
+const { name, size = 20, label, class: className, strokeWidth = 2 } = Astro.props;
+const a11y = label ? { role: 'img' as const, 'aria-label': label } : { 'aria-hidden': 'true' as const };
+const Lucide = name in lucideIcons ? lucideIcons[name as keyof typeof lucideIcons] : null;
+---
+
+{
+  Lucide ? (
+    <Lucide size={size} stroke-width={strokeWidth} class:list={['icon', className]} focusable="false" {...a11y} />
+  ) : (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width={strokeWidth}
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class:list={['icon', className]}
+      focusable="false"
+      {...a11y}
+      set:html={brandIcons[name as keyof typeof brandIcons]}
+    />
+  )
+}
+
+<style>
+  .icon {
+    flex-shrink: 0;
+  }
+</style>

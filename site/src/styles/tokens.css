@@ -1,0 +1,213 @@
+/* ==========================================================================
+   Mistertech — Design tokens
+   Fonte única de cores, tipografia, espaçamento e movimento.
+   Componentes usam apenas os tokens semânticos (--color-*, --space-*, ...);
+   as escalas brutas (--yellow-*, --ink-*) existem para compor os semânticos.
+   ========================================================================== */
+
+:root {
+  /* ---------- Escala: amarelo da marca ---------- */
+  --yellow-50: #fffbea;
+  --yellow-100: #fff3c4;
+  --yellow-200: #ffe68a;
+  --yellow-300: #ffd84d;
+  --yellow-400: #ffd000;
+  --yellow-500: #fdc300; /* amarelo Mistertech */
+  --yellow-600: #e0a800;
+  --yellow-700: #b38500;
+  --yellow-800: #7a5b00;
+  --yellow-900: #4d3900;
+
+  /* ---------- Escala: neutros (tinta) ---------- */
+  --ink-0: #ffffff;
+  --ink-50: #f7f7f5;
+  --ink-100: #efeeec;
+  --ink-200: #e0dfdc;
+  --ink-300: #c4c3bf;
+  --ink-400: #9a9995;
+  --ink-500: #6f6e6b;
+  --ink-600: #4d4c4b; /* texto do site antigo */
+  --ink-700: #33332f;
+  --ink-800: #1f1f1d;
+  --ink-900: #141413;
+  --ink-950: #0b0b0a;
+
+  /* ---------- Escala: estados ---------- */
+  --green-50: #edf8f1;
+  --green-600: #1d7a45;
+  --red-50: #fdf0ee;
+  --red-600: #b42318;
+  --blue-50: #eef4ff;
+  --blue-600: #2456c7;
+
+  /* ---------- Semânticos (tema claro) ---------- */
+  --color-bg: var(--ink-0);
+  --color-bg-subtle: var(--ink-50);
+  --color-bg-muted: var(--ink-100);
+  --color-bg-accent: var(--yellow-500);
+  --color-bg-accent-subtle: var(--yellow-50);
+  --color-bg-inverse: var(--ink-950);
+
+  --color-surface: var(--ink-0);
+  --color-surface-raised: var(--ink-0);
+
+  --color-text: var(--ink-900);
+  --color-text-muted: var(--ink-600);
+  --color-text-subtle: var(--ink-500);
+  --color-text-inverse: var(--ink-0);
+  --color-text-on-accent: var(--ink-950);
+  --color-text-accent: var(--yellow-800); /* amarelo legível sobre fundo claro */
+
+  --color-border: var(--ink-200);
+  --color-border-strong: var(--ink-300);
+  --color-border-accent: var(--yellow-500);
+
+  --color-accent: var(--yellow-500);
+  --color-accent-hover: var(--yellow-400);
+  --color-accent-active: var(--yellow-600);
+
+  --color-action: var(--ink-950); /* botões secundários e links fortes */
+  --color-action-hover: var(--ink-700);
+
+  --color-link: var(--ink-950);
+  --color-link-decoration: var(--yellow-500);
+
+  --color-focus: var(--ink-950);
+  --color-focus-halo: var(--yellow-400);
+
+  --color-success: var(--green-600);
+  --color-success-bg: var(--green-50);
+  --color-danger: var(--red-600);
+  --color-danger-bg: var(--red-50);
+  --color-info: var(--blue-600);
+  --color-info-bg: var(--blue-50);
+
+  /* ---------- Tipografia ---------- */
+  --font-display: 'Geometria', 'Outfit', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --text-xs: 0.75rem;   /* 12 */
+  --text-sm: 0.875rem;  /* 14 */
+  --text-base: 1rem;    /* 16 */
+  --text-md: 1.0625rem; /* 17 — corpo de leitura */
+  --text-lg: 1.1875rem; /* 19 */
+  --text-xl: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.3rem + 0.9vw, 2rem);
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.6vw, 2.75rem);
+  --text-4xl: clamp(2.25rem, 1.6rem + 2.8vw, 3.75rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.25;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  /* ---------- Espaçamento (base 4px) ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  --section-space: clamp(3.5rem, 2.5rem + 4vw, 6.5rem);
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
+
+  /* ---------- Layout ---------- */
+  --container-max: 1200px;
+  --container-narrow: 760px;
+  --header-height: 72px;
+
+  /* ---------- Bordas ---------- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  --border-width: 1px;
+
+  /* ---------- Sombras ---------- */
+  --shadow-xs: 0 1px 2px rgb(20 20 19 / 0.06);
+  --shadow-sm: 0 1px 3px rgb(20 20 19 / 0.08), 0 1px 2px rgb(20 20 19 / 0.04);
+  --shadow-md: 0 8px 24px -6px rgb(20 20 19 / 0.12), 0 2px 6px rgb(20 20 19 / 0.05);
+  --shadow-lg: 0 24px 48px -12px rgb(20 20 19 / 0.22);
+  --shadow-focus: 0 0 0 2px var(--color-bg), 0 0 0 5px var(--color-focus-halo);
+
+  /* ---------- Movimento ---------- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+
+  /* ---------- Camadas ---------- */
+  --z-header: 50;
+  --z-overlay: 90;
+  --z-toast: 100;
+}
+
+/* Seções escuras: os mesmos componentes funcionam dentro de .theme-dark
+   porque só os tokens semânticos mudam. */
+.theme-dark {
+  --color-bg: var(--ink-950);
+  --color-bg-subtle: var(--ink-900);
+  --color-bg-muted: var(--ink-800);
+  --color-surface: var(--ink-900);
+  --color-surface-raised: var(--ink-800);
+
+  --color-text: var(--ink-0);
+  --color-text-muted: #c9c8c4;
+  --color-text-subtle: #a3a29e;
+  --color-text-accent: var(--yellow-500);
+
+  --color-border: rgb(255 255 255 / 0.12);
+  --color-border-strong: rgb(255 255 255 / 0.24);
+
+  --color-action: var(--ink-0);
+  --color-action-hover: var(--ink-200);
+
+  --color-link: var(--ink-0);
+  --color-focus: var(--yellow-500);
+  --color-focus-halo: var(--yellow-500);
+
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Seções amarelas (fundo de marca). */
+.theme-accent {
+  --color-bg: var(--yellow-500);
+  --color-bg-subtle: var(--yellow-400);
+  --color-surface: var(--ink-0);
+  --color-text: var(--ink-950);
+  --color-text-muted: var(--ink-800);
+  --color-text-subtle: var(--ink-700);
+  --color-text-accent: var(--ink-950);
+  --color-border: rgb(11 11 10 / 0.16);
+  --color-border-strong: rgb(11 11 10 / 0.32);
+  --color-accent: var(--ink-950);
+  --color-accent-hover: var(--ink-800);
+  --color-accent-active: var(--ink-700);
+  --color-text-on-accent: var(--ink-0);
+  --color-link-decoration: var(--ink-950);
+  --color-focus-halo: var(--ink-0);
+
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}

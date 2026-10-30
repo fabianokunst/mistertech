@@ -1,0 +1,67 @@
+---
+import '@fontsource/lato/latin-400.css';
+import '@fontsource/lato/latin-700.css';
+import '@fontsource/outfit/latin-500.css';
+import '../styles/global.css';
+
+import Seo, { type SeoProps } from '../components/layout/Seo.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import CookieConsent from '../components/layout/CookieConsent.astro';
+
+type Props = SeoProps & {
+  /** href da seção do menu marcada como atual. */
+  secao?: string;
+  /** JSON-LD extra da página. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+};
+
+const { secao, jsonLd, ...seo } = Astro.props;
+
+// Geometria (fonte da marca, licenciada). Se os arquivos não estiverem em
+// src/assets/fonts/geometria/, o site usa Outfit, que tem desenho parecido.
+const geometria = import.meta.glob<string>('../assets/fonts/geometria/*.woff2', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+const pesos = Object.entries(geometria).map(([arquivo, src]) => ({
+  peso: arquivo.match(/-(\d{3})\.woff2$/)?.[1] ?? '400',
+  src,
+}));
+const fontFace = pesos
+  .map(
+    ({ peso, src }) =>
+      `@font-face{font-family:'Geometria';font-style:normal;font-weight:${peso};font-display:swap;src:url('${src}') format('woff2');}`,
+  )
+  .join('');
+const preload = pesos.find((p) => p.peso === '500')?.src;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    {preload && <link rel="preload" href={preload} as="font" type="font/woff2" crossorigin />}
+    {fontFace && <style is:inline set:html={fontFace} />}
+    <Seo {...seo} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <Header secao={secao} />
+    <main id="conteudo" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <CookieConsent />
+  </body>
+</html>
+
+<style>
+  main:focus {
+    outline: none;
+  }
+</style>

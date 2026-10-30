@@ -1,0 +1,80 @@
+---
+/** Faixa final de ajuda: leva para o FAQ e para o contato. */
+import Button from '../ui/Button.astro';
+import { site } from '../../data/site';
+
+interface Props {
+  title?: string;
+  text?: string;
+  /** Na própria página de dúvidas, o primeiro botão leva ao contato. */
+  naPaginaDeDuvidas?: boolean;
+}
+
+const {
+  title = 'Ficou com alguma dúvida?',
+  text = `Veja as respostas para as perguntas mais comuns ou fale com a nossa equipe pelo e-mail ${site.email}.`,
+  naPaginaDeDuvidas = false,
+} = Astro.props;
+---
+
+<section class="help-cta theme-dark">
+  <div class="container help-cta__inner">
+    <div class="help-cta__text">
+      <h2>{title}</h2>
+      <p class="lead">{text}</p>
+    </div>
+    <div class="cluster">
+      {
+        naPaginaDeDuvidas ? (
+          <>
+            <Button href="/contato/" icon="mail" iconPosition="start">Fale com a gente</Button>
+            <Button href="/politica-de-trocas/" variant="outline">Trocas e garantia</Button>
+          </>
+        ) : (
+          <>
+            <Button href="/suporte-e-trocas/" icon="help" iconPosition="start">Dúvidas frequentes</Button>
+            <Button href="/contato/" variant="outline" icon="mail" iconPosition="start">Fale com a gente</Button>
+          </>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .help-cta {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(var(--space-12), 6vw, var(--space-20));
+  }
+
+  .help-cta::before {
+    content: '';
+    position: absolute;
+    left: -140px;
+    bottom: -200px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    border: 64px solid var(--yellow-500);
+    opacity: 0.14;
+  }
+
+  .help-cta__inner {
+    position: relative;
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  .help-cta__text {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 900px) {
+    .help-cta__inner {
+      grid-template-columns: 1fr auto;
+    }
+  }
+</style>

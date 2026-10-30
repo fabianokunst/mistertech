@@ -1,0 +1,45 @@
+---
+/**
+ * Logotipo. `padrao` (preto + amarelo) para fundos claros,
+ * `negativo` (branco + amarelo) para fundos escuros.
+ */
+import { Image } from 'astro:assets';
+import logo from '../../assets/marca/logo.png';
+import logoNegativo from '../../assets/marca/logo-negativo.png';
+import { url } from '../../lib/url';
+
+interface Props {
+  variant?: 'padrao' | 'negativo';
+  height?: number;
+  link?: boolean;
+  class?: string;
+}
+
+const { variant = 'padrao', height = 28, link = true, class: className } = Astro.props;
+const src = variant === 'negativo' ? logoNegativo : logo;
+const width = Math.round((src.width / src.height) * height);
+---
+
+{
+  link ? (
+    <a href={url('/')} class:list={['logo', className]} aria-label="Mistertech, página inicial">
+      <Image src={src} alt="" width={width} height={height} densities={[1, 2]} loading="eager" />
+    </a>
+  ) : (
+    <span class:list={['logo', className]}>
+      <Image src={src} alt="Mistertech" width={width} height={height} densities={[1, 2]} />
+    </span>
+  )
+}
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .logo:focus-visible {
+    outline-offset: 6px;
+  }
+</style>

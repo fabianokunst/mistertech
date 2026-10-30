@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import { categorias } from '../data/categorias';
+import { url } from '../lib/url';
+---
+
+<BaseLayout title="Página não encontrada" noindex>
+  <section class="section not-found">
+    <div class="container container--narrow not-found__inner">
+      <p class="not-found__code" aria-hidden="true">404</p>
+      <h1>Página não encontrada</h1>
+      <p class="lead">O endereço pode ter mudado com o novo site. Que tal começar por aqui?</p>
+      <div class="cluster not-found__actions">
+        <Button href="/acessorios/" icon="arrow-right">Ver acessórios</Button>
+        <Button href="/" variant="outline">Ir para o início</Button>
+      </div>
+      <ul role="list" class="cluster not-found__links">
+        {
+          categorias.map((c) => (
+            <li>
+              <a href={url(`/${c.slug}/`)}>{c.nome}</a>
+            </li>
+          ))
+        }
+        <li><a href={url('/suporte-e-trocas/')}>Suporte e trocas</a></li>
+        <li><a href={url('/contato/')}>Contato</a></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found__inner {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-5);
+    text-align: center;
+  }
+
+  .not-found__code {
+    display: grid;
+    place-items: center;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: var(--yellow-500);
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: var(--weight-medium);
+    color: var(--ink-950);
+  }
+
+  .not-found__actions {
+    justify-content: center;
+  }
+
+  .not-found__links {
+    justify-content: center;
+    margin-top: var(--space-4);
+    font-weight: var(--weight-bold);
+  }
+</style>

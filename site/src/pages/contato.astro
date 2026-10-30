@@ -1,0 +1,289 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import Button from '../components/ui/Button.astro';
+import Field from '../components/ui/Field.astro';
+import Icon from '../components/ui/Icon.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+const assuntos = ['Dúvida sobre um produto', 'Troca ou garantia', 'Pedido feito em uma loja parceira', 'Outro assunto'];
+---
+
+<BaseLayout
+  title="Contato"
+  description={`Fale com a Mistertech pelo e-mail ${site.email} ou pelo formulário. Atendimento de segunda a sábado.`}
+  secao="/contato/"
+>
+  <PageHeader
+    title="Fale com a gente"
+    icon="message-circle"
+    lead="Será um prazer atender você. Escreva para a nossa equipe e responderemos o quanto antes."
+    breadcrumbs={[{ label: 'Contato' }]}
+  />
+
+  <section class="section">
+    <div class="container contact">
+      <aside class="contact__info">
+        <div class="info-card">
+          <span class="info-card__icon"><Icon name="mail" size={22} /></span>
+          <div>
+            <h2 class="info-card__title">E-mail</h2>
+            <a href={`mailto:${site.email}`} class="info-card__link">{site.email}</a>
+          </div>
+        </div>
+        <div class="info-card">
+          <span class="info-card__icon"><Icon name="clock" size={22} /></span>
+          <div>
+            <h2 class="info-card__title">Horário de atendimento</h2>
+            <dl class="hours">
+              {
+                site.horario.map((h) => (
+                  <div>
+                    <dt>{h.dias}</dt>
+                    <dd>{h.horas}</dd>
+                  </div>
+                ))
+              }
+            </dl>
+          </div>
+        </div>
+        <div class="info-card info-card--muted">
+          <span class="info-card__icon"><Icon name="help" size={22} /></span>
+          <div>
+            <h2 class="info-card__title">Antes de escrever</h2>
+            <p>
+              Muitas respostas já estão nas <a href={url('/suporte-e-trocas/')}>dúvidas frequentes</a>. Para pedidos feitos
+              em uma loja parceira, o status está em “Meus pedidos”, no site da loja.
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      <div class="form-card">
+        <h2 class="form-card__title">Envie a sua mensagem</h2>
+        <form class="form" novalidate data-contact-form data-endpoint={site.formularioContato} data-email={site.email}>
+          <div class="form__row">
+            <Field label="Nome" name="nome" required autocomplete="name" maxlength={120} />
+            <Field label="E-mail" name="email" type="email" required autocomplete="email" maxlength={160} />
+          </div>
+          <Field label="Assunto" name="assunto" as="select" options={assuntos} required />
+          <Field
+            label="Mensagem"
+            name="mensagem"
+            as="textarea"
+            required
+            rows={6}
+            maxlength={4000}
+            hint="Se for sobre um pedido, informe a loja, o número do pedido ou da nota fiscal."
+          />
+          <!-- Armadilha para robôs: pessoas não veem este campo. -->
+          <div class="form__trap" aria-hidden="true">
+            <label>Empresa <input type="text" name="empresa" tabindex="-1" autocomplete="off" /></label>
+          </div>
+          <div class="form__footer">
+            <Button type="submit" size="lg" icon="arrow-right">Enviar mensagem</Button>
+            <p class="form__note">Seus dados são usados só para responder a esta mensagem.</p>
+          </div>
+          <p class="form__status" role="status" aria-live="polite" data-status></p>
+        </form>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const status = form?.querySelector<HTMLElement>('[data-status]');
+
+  function mostrar(msg: string, tipo: 'ok' | 'erro') {
+    if (!status) return;
+    status.textContent = msg;
+    status.dataset.tipo = tipo;
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    const dados = new FormData(form);
+    if (dados.get('empresa')) return; // robô
+
+    const nome = String(dados.get('nome')).trim();
+    const email = String(dados.get('email')).trim();
+    const assunto = String(dados.get('assunto'));
+    const mensagem = String(dados.get('mensagem')).trim();
+    document.dispatchEvent(new CustomEvent('mt:contato', { detail: { nome, email } }));
+
+    const endpoint = form.dataset.endpoint;
+    const destino = form.dataset.email!;
+
+    if (!endpoint) {
+      // Sem servidor: abre o e-mail do visitante com a mensagem pronta.
+      const corpo = `${mensagem}\n\n— ${nome} (${email})`;
+      location.href = `mailto:${destino}?subject=${encodeURIComponent(`[Site] ${assunto}`)}&body=${encodeURIComponent(corpo)}`;
+      mostrar(`Abrimos o seu aplicativo de e-mail com a mensagem pronta. Se ele não abrir, escreva para ${destino}.`, 'ok');
+      return;
+    }
+
+    const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    botao?.setAttribute('disabled', '');
+    try {
+      const resposta = await fetch(endpoint, { method: 'POST', body: dados, headers: { Accept: 'application/json' } });
+      if (!resposta.ok) throw new Error(String(resposta.status));
+      form.reset();
+      mostrar('Mensagem enviada! Responderemos no seu e-mail o quanto antes.', 'ok');
+    } catch {
+      mostrar(`Não foi possível enviar agora. Tente de novo ou escreva para ${destino}.`, 'erro');
+    } finally {
+      botao?.removeAttribute('disabled');
+    }
+  });
+</script>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-10);
+  }
+
+  @media (min-width: 1024px) {
+    .contact {
+      grid-template-columns: 380px 1fr;
+      gap: var(--space-12);
+      align-items: start;
+    }
+  }
+
+  .contact__info {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .info-card {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .info-card--muted {
+    background: var(--color-bg-subtle);
+  }
+
+  .info-card__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--yellow-500);
+    color: var(--ink-950);
+  }
+
+  .info-card__title {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-1);
+  }
+
+  .info-card p {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .info-card__link {
+    font-weight: var(--weight-bold);
+    overflow-wrap: anywhere;
+  }
+
+  .hours {
+    display: grid;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+  }
+
+  .hours div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .hours dt {
+    color: var(--color-text-muted);
+  }
+
+  .hours dd {
+    font-weight: var(--weight-bold);
+  }
+
+  .form-card {
+    padding: clamp(var(--space-6), 4vw, var(--space-10));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-md);
+  }
+
+  .form-card__title {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-6);
+  }
+
+  .form {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .form__row {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 640px) {
+    .form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form__trap {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .form__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .form__note {
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  .form__status:empty {
+    display: none;
+  }
+
+  .form__status {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .form__status[data-tipo='ok'] {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+  }
+
+  .form__status[data-tipo='erro'] {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+  }
+</style>

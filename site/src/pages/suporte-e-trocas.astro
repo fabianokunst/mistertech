@@ -1,0 +1,243 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import FaqItem from '../components/ui/FaqItem.astro';
+import Icon from '../components/ui/Icon.astro';
+import type { IconName } from '../components/ui/icons';
+import HelpCta from '../components/sections/HelpCta.astro';
+import { faq } from '../data/faq';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+const atalhos: { href: string; icone: IconName; titulo: string; texto: string }[] = [
+  {
+    href: '/politica-de-trocas/',
+    icone: 'refresh',
+    titulo: 'Trocas e garantia',
+    texto: `Garantia de ${site.garantia.total} meses, trocas e devoluções.`,
+  },
+  { href: '/onde-comprar/', icone: 'store', titulo: 'Onde comprar', texto: 'Lojas parceiras, físicas e online.' },
+  { href: '/contato/', icone: 'mail', titulo: 'Fale com a gente', texto: `${site.email}` },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.flatMap((g) =>
+    g.perguntas.map((p) => ({
+      '@type': 'Question',
+      name: p.pergunta,
+      acceptedAnswer: { '@type': 'Answer', text: p.resposta },
+    })),
+  ),
+};
+---
+
+<BaseLayout
+  title="Suporte e trocas"
+  description="Tire dúvidas sobre compras, entrega, trocas, devoluções e garantia dos produtos Mistertech."
+  secao="/suporte-e-trocas/"
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    title="Suporte e trocas"
+    icon="headset"
+    lead="Precisou de uma ajudinha? A Mistertech é uma marca séria e comprometida: conte com a gente para resolver dúvidas, trocas e suporte."
+    breadcrumbs={[{ label: 'Suporte e trocas' }]}
+  />
+
+  <section class="section section--tight">
+    <div class="container">
+      <ul role="list" class="shortcuts">
+        {
+          atalhos.map((a) => (
+            <li>
+              <a href={url(a.href)} class="shortcut">
+                <span class="shortcut__icon">
+                  <Icon name={a.icone} size={22} />
+                </span>
+                <span class="shortcut__text">
+                  <strong>{a.titulo}</strong>
+                  <span>{a.texto}</span>
+                </span>
+                <Icon name="arrow-right" size={20} class="shortcut__arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section faq" aria-labelledby="faq-titulo">
+    <div class="container faq__grid">
+      <aside class="faq__nav">
+        <h2 id="faq-titulo" class="faq__heading">Dúvidas frequentes</h2>
+        <nav aria-label="Assuntos">
+          <ul role="list">
+            {
+              faq.map((g) => (
+                <li>
+                  <a href={`#${g.id}`}>
+                    {g.titulo}
+                    <span>{g.perguntas.length}</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="faq__groups">
+        {
+          faq.map((g) => (
+            <section id={g.id} class="faq__group" aria-labelledby={`${g.id}-titulo`}>
+              <h3 id={`${g.id}-titulo`} class="eyebrow faq__group-title">
+                {g.titulo}
+              </h3>
+              {g.perguntas.map((p) => (
+                <FaqItem pergunta={p.pergunta} resposta={p.resposta} />
+              ))}
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <HelpCta naPaginaDeDuvidas title="Não encontrou a sua resposta?" text={`Escreva para ${site.email}. Atendemos de segunda a sexta, das 8h às 18h, e aos sábados, das 9h às 18h.`} />
+</BaseLayout>
+
+<style>
+  .shortcuts {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  }
+
+  .shortcut {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    height: 100%;
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-text);
+    text-decoration: none;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .shortcut:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .shortcut__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--yellow-500);
+    color: var(--ink-950);
+  }
+
+  .shortcut__text {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+  }
+
+  .shortcut__text strong {
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--text-lg);
+  }
+
+  .shortcut__text span {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .faq {
+    padding-top: 0;
+  }
+
+  .faq__grid {
+    display: grid;
+    gap: var(--space-10);
+  }
+
+  @media (min-width: 1024px) {
+    .faq__grid {
+      grid-template-columns: 260px 1fr;
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .faq__nav {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+
+  .faq__heading {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-5);
+  }
+
+  .faq__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  @media (min-width: 1024px) {
+    .faq__nav ul {
+      display: grid;
+      gap: var(--space-1);
+    }
+  }
+
+  .faq__nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-subtle);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .faq__nav a:hover {
+    background: var(--color-bg-muted);
+  }
+
+  .faq__nav a span {
+    color: var(--color-text-subtle);
+    font-weight: var(--weight-regular);
+  }
+
+  .faq__groups {
+    display: grid;
+    gap: var(--space-12);
+  }
+
+  .faq__group-title {
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--ink-950);
+    color: var(--color-text);
+  }
+</style>

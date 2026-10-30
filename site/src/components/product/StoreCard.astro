@@ -1,0 +1,119 @@
+---
+/** Card de parceiro (loja) com logo, público e link externo. */
+import { Image } from 'astro:assets';
+import Badge from '../ui/Badge.astro';
+import Icon from '../ui/Icon.astro';
+import type { Loja } from '../../data/lojas';
+
+interface Props {
+  loja: Loja;
+  as?: 'h2' | 'h3';
+}
+
+const { loja, as: Tag = 'h3' } = Astro.props;
+---
+
+<article class="store-card">
+  <div class="store-card__logo">
+    <Image src={loja.logo} alt="" height={56} densities={[1, 2]} loading="lazy" />
+  </div>
+  <div class="store-card__body">
+    <Badge size="sm" icon={loja.publico === 'Para empresas' ? 'building' : 'user'}>{loja.publico}</Badge>
+    <Tag class="store-card__title">
+      <a href={loja.url} target="_blank" rel="noopener">
+        {loja.nome}
+        <span class="visually-hidden">(abre em nova aba)</span>
+      </a>
+    </Tag>
+    <p class="store-card__text">{loja.descricao}</p>
+    <span class="store-card__cta" aria-hidden="true">
+      {loja.publico === 'Para empresas' ? 'Acessar o site' : 'Ver produtos Mistertech'}
+      <Icon name="arrow-up-right" size={16} />
+    </span>
+  </div>
+</article>
+
+<style>
+  .store-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    overflow: hidden;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out);
+  }
+
+  .store-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-strong);
+  }
+
+  .store-card:focus-within {
+    box-shadow: var(--shadow-focus);
+  }
+
+  .store-card__logo {
+    display: grid;
+    place-items: center;
+    height: 120px;
+    background: #fff;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .store-card__logo :global(img) {
+    max-height: 56px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .store-card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    gap: var(--space-2);
+    padding: var(--space-5);
+  }
+
+  .store-card__title {
+    font-size: var(--text-xl);
+  }
+
+  .store-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .store-card__title a:focus-visible {
+    outline: none;
+  }
+
+  .store-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .store-card__text {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .store-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: auto;
+    padding-top: var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+</style>

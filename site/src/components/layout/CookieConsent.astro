@@ -1,0 +1,163 @@
+---
+/**
+ * Consentimento de cookies (LGPD) + SAP Emarsys.
+ * O script da Emarsys só é carregado depois que o visitante aceita.
+ * A escolha fica no localStorage; o link do rodapé reabre o aviso.
+ */
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import { site } from '../../data/site';
+---
+
+<div class="consent" role="region" aria-label="Aviso de cookies" hidden data-consent data-merchant={site.emarsys.merchantId}>
+  <div class="consent__body">
+    <Icon name="cookie" size={24} class="consent__icon" />
+    <div>
+      <p class="consent__title">Cookies</p>
+      <p class="consent__text">
+        Usamos cookies para entender como o site é usado e mostrar ofertas mais relevantes. Você pode aceitar ou recusar —
+        o site funciona do mesmo jeito.
+      </p>
+    </div>
+  </div>
+  <div class="consent__actions">
+    <Button size="sm" variant="outline" data-consent-choice="recusado">Recusar</Button>
+    <Button size="sm" variant="primary" data-consent-choice="aceito">Aceitar</Button>
+  </div>
+</div>
+
+<script>
+  type Scarab = unknown[] & { push: (...args: unknown[]) => number };
+  type Window = typeof globalThis & { ScarabQueue?: Scarab };
+
+  const CHAVE = 'mt-consentimento';
+  const banner = document.querySelector<HTMLElement>('[data-consent]');
+  const merchant = banner?.dataset.merchant ?? '';
+  const w = window as Window;
+
+  const ler = () => {
+    try {
+      return localStorage.getItem(CHAVE);
+    } catch {
+      return null;
+    }
+  };
+
+  const gravar = (valor: string) => {
+    try {
+      localStorage.setItem(CHAVE, valor);
+    } catch {
+      /* navegação privada: vale só para esta página */
+    }
+  };
+
+  function carregarEmarsys() {
+    if (!merchant || document.getElementById('scarab-js-api')) return;
+    w.ScarabQueue = w.ScarabQueue || ([] as unknown as Scarab);
+    const js = document.createElement('script');
+    js.id = 'scarab-js-api';
+    js.async = true;
+    js.src = `https://cdn.scarabresearch.com/js/${merchant}/scarab-v2.js`;
+    document.head.appendChild(js);
+    w.ScarabQueue.push(['go']);
+  }
+
+  /** Eventos personalizados (mesmos nomes do site antigo). */
+  function rastrear(...comando: unknown[]) {
+    if (!w.ScarabQueue) return;
+    w.ScarabQueue.push(comando);
+    w.ScarabQueue.push(['go']);
+  }
+
+  document.addEventListener('click', (e) => {
+    const alvo = (e.target as HTMLElement).closest<HTMLAnchorElement>('[data-track]');
+    if (!alvo) return;
+    if (alvo.dataset.track === 'menu') {
+      rastrear('tag', 'menu_click', { categoria_menu: alvo.textContent?.trim(), categoria_url: alvo.href });
+    } else if (alvo.dataset.track === 'produto') {
+      rastrear('tag', 'product_click', { id: alvo.dataset.id, sku: alvo.dataset.sku, name: alvo.dataset.name, url: alvo.href });
+    }
+  });
+
+  document.addEventListener('mt:contato', (e) => {
+    const { nome, email } = (e as CustomEvent<{ nome: string; email: string }>).detail;
+    if (!w.ScarabQueue) return;
+    w.ScarabQueue.push(['setEmail', email]);
+    rastrear('tag', 'contato_formulario', { nome, email });
+  });
+
+  function mostrar(visivel: boolean) {
+    if (banner) banner.hidden = !visivel;
+  }
+
+  banner?.querySelectorAll<HTMLButtonElement>('[data-consent-choice]').forEach((botao) => {
+    botao.addEventListener('click', () => {
+      const escolha = botao.dataset.consentChoice!;
+      gravar(escolha);
+      mostrar(false);
+      if (escolha === 'aceito') carregarEmarsys();
+      else if (document.getElementById('scarab-js-api')) location.reload();
+    });
+  });
+
+  document.querySelectorAll('[data-open-consent]').forEach((el) => el.addEventListener('click', () => mostrar(true)));
+
+  const atual = ler();
+  if (atual === 'aceito') carregarEmarsys();
+  else if (atual === null) mostrar(true);
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: var(--z-overlay);
+    display: grid;
+    gap: var(--space-4);
+    max-width: 440px;
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+    animation: subir var(--duration-slow) var(--ease-out);
+  }
+
+  .consent[hidden] {
+    display: none;
+  }
+
+  .consent__body {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .consent :global(.consent__icon) {
+    color: var(--yellow-700);
+  }
+
+  .consent__title {
+    font-weight: var(--weight-bold);
+  }
+
+  .consent__text {
+    margin-top: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .consent__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
+  @keyframes subir {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+</style>

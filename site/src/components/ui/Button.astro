@@ -1,0 +1,178 @@
+---
+/**
+ * Botão do design system. Com `href` vira link (<a>); sem, <button>.
+ * Links externos abrem em nova aba e avisam leitores de tela.
+ *
+ * Variantes:
+ *  - primary   ação principal (amarelo; preto em seções .theme-accent)
+ *  - secondary ação forte neutra (preto; branco em .theme-dark)
+ *  - outline   ação secundária
+ *  - ghost     ação discreta (barras, menus)
+ */
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+import { url } from '../../lib/url';
+
+type Props = Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> & {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: IconName;
+  iconPosition?: 'start' | 'end';
+  external?: boolean;
+  block?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+};
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  iconPosition = 'end',
+  external,
+  block = false,
+  type = 'button',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const isExternal = external ?? (href ? /^https?:/.test(href) : false);
+const iconSize = size === 'sm' ? 16 : size === 'lg' ? 20 : 18;
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, block && 'btn--block', className];
+const target = isExternal ? { target: '_blank', rel: 'noopener' } : {};
+---
+
+{
+  href ? (
+    <a href={url(href)} class:list={classes} {...target} {...rest}>
+      {icon && iconPosition === 'start' && <Icon name={icon} size={iconSize} />}
+      <span class="btn__label">
+        <slot />
+      </span>
+      {isExternal && <span class="visually-hidden">(abre em nova aba)</span>}
+      {icon && iconPosition === 'end' && <Icon name={icon} size={iconSize} class="btn__icon-end" />}
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...rest}>
+      {icon && iconPosition === 'start' && <Icon name={icon} size={iconSize} />}
+      <span class="btn__label">
+        <slot />
+      </span>
+      {icon && iconPosition === 'end' && <Icon name={icon} size={iconSize} class="btn__icon-end" />}
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border: 2px solid transparent;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+    border-radius: var(--radius-pill);
+  }
+
+  .btn[disabled],
+  .btn[aria-disabled='true'] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .btn :global(.btn__icon-end) {
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .btn:hover :global(.btn__icon-end) {
+    transform: translateX(2px);
+  }
+
+  /* Tamanhos */
+  .btn--sm {
+    min-height: 36px;
+    padding-inline: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  .btn--md {
+    min-height: 48px;
+    padding-inline: var(--space-6);
+    font-size: var(--text-base);
+  }
+
+  .btn--lg {
+    min-height: 56px;
+    padding-inline: var(--space-8);
+    font-size: var(--text-md);
+  }
+
+  .btn--block {
+    width: 100%;
+  }
+
+  /* Variantes */
+  .btn--primary {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+  }
+
+  .btn--primary:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .btn--primary:active {
+    background: var(--color-accent-active);
+  }
+
+  .btn--secondary {
+    background: var(--color-action);
+    color: var(--color-bg);
+  }
+
+  .btn--secondary:hover {
+    background: var(--color-action-hover);
+  }
+
+  .btn--outline {
+    background: transparent;
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+
+  .btn--outline:hover {
+    border-color: var(--color-text);
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--color-text);
+    padding-inline: var(--space-3);
+  }
+
+  .btn--ghost:hover {
+    background: var(--color-bg-muted);
+  }
+</style>

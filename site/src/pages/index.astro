@@ -1,0 +1,470 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import Badge from '../components/ui/Badge.astro';
+import Icon from '../components/ui/Icon.astro';
+import Feature from '../components/ui/Feature.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import ProductCard from '../components/product/ProductCard.astro';
+import CategoryCard from '../components/product/CategoryCard.astro';
+import StoreCard from '../components/product/StoreCard.astro';
+import HelpCta from '../components/sections/HelpCta.astro';
+import heroProdutos from '../assets/fotos/hero-produtos.png';
+import fotoCarregadores from '../assets/fotos/carregadores.jpg';
+import { site } from '../data/site';
+import { categorias } from '../data/categorias';
+import { lojas } from '../data/lojas';
+import { getProdutos } from '../lib/produtos';
+import { absoluteUrl } from '../lib/url';
+
+const produtos = await getProdutos();
+const destaques = produtos.filter((p) => p.data.destaque).slice(0, 4);
+const capaDe = (slug: string) => produtos.find((p) => p.id === slug)!.data.imagens[0];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: site.nome,
+  url: absoluteUrl('/', Astro.site),
+  logo: absoluteUrl('/icon-512.png', Astro.site),
+  email: site.email,
+  slogan: site.slogan,
+  parentOrganization: { '@type': 'Organization', name: site.grupo.nome },
+  sameAs: [site.social.instagram, site.social.facebook],
+};
+---
+
+<BaseLayout title={site.nome} jsonLd={jsonLd}>
+  <!-- Abertura -->
+  <section class="hero theme-dark">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <p class="hero__slogan">
+          <span class="hero__dot" aria-hidden="true"></span>
+          {site.slogan}
+        </p>
+        <h1 class="hero__title">
+          Carregadores, cabos e periféricos que <span class="hero__highlight">facilitam a sua rotina</span>.
+        </h1>
+        <p class="lead hero__lead">
+          Acessórios homologados, feitos com materiais resistentes e com 12 meses de garantia. Escolha o seu e compre
+          nos parceiros oficiais.
+        </p>
+        <div class="cluster hero__actions">
+          <Button href="/acessorios/" size="lg" icon="arrow-right">Ver acessórios</Button>
+          <Button href="/onde-comprar/" size="lg" variant="outline" icon="store" iconPosition="start">Onde comprar</Button>
+        </div>
+        <ul role="list" class="hero__proof">
+          <li><Icon name="shield-check" size={18} /> Homologados pela Anatel</li>
+          <li><Icon name="badge-check" size={18} /> 12 meses de garantia</li>
+          <li><Icon name="store" size={18} /> iPlace e taQi</li>
+        </ul>
+      </div>
+
+      <div class="hero__visual" aria-hidden="true">
+        <div class="hero__disc"></div>
+        <div class="hero__ring"></div>
+        <Image
+          src={heroProdutos}
+          alt=""
+          widths={[400, 600]}
+          sizes="(min-width: 1024px) 560px, 90vw"
+          loading="eager"
+          fetchpriority="high"
+          class="hero__img"
+        />
+        <span class="hero__chip hero__chip--a"><Icon name="zap" size={16} /> 30 W Power Delivery</span>
+        <span class="hero__chip hero__chip--b"><Icon name="badge-check" size={16} /> Cabos com certificação MFi</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categorias -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader eyebrow="Acessórios Mistertech" title="Encontre o acessório certo" lead="Cabos, carregadores, kits de viagem e periféricos para o dia a dia.">
+        <Button slot="actions" href="/acessorios/" variant="outline" icon="arrow-right">Ver todos</Button>
+      </SectionHeader>
+      <ul role="list" class="grid-auto categories">
+        {
+          categorias.map((c) => (
+            <li>
+              <CategoryCard
+                categoria={c}
+                total={produtos.filter((p) => p.data.categoria === c.slug).length}
+                imagem={capaDe(c.capa)}
+              />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Destaques -->
+  <section class="section section--subtle">
+    <div class="container">
+      <SectionHeader eyebrow="Destaques" title="Os essenciais da linha" lead="Os produtos para carregar, conectar e trabalhar melhor.">
+        <Button slot="actions" href="/acessorios/" variant="outline" icon="arrow-right">Ver catálogo</Button>
+      </SectionHeader>
+      <ul role="list" class="grid-auto products">
+        {
+          destaques.map((p) => (
+            <li>
+              <ProductCard produto={p} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Produto em evidência -->
+  <section class="section spotlight">
+    <div class="container spotlight__grid">
+      <div class="spotlight__media">
+        <Image
+          src={fotoCarregadores}
+          alt="Quatro carregadores de parede Mistertech de 30 W, nas cores preta e branca"
+          widths={[480, 720, 960]}
+          sizes="(min-width: 1024px) 560px, 92vw"
+          loading="lazy"
+        />
+      </div>
+      <div class="spotlight__copy">
+        <Badge variant="accent" icon="zap">Carregamento rápido</Badge>
+        <h2>Carregador de Parede 30 W</h2>
+        <p class="lead">
+          Duas saídas para carregar celular, tablet e fone ao mesmo tempo: USB-C com Power Delivery e USB-A com Quick
+          Charge 3.0.
+        </p>
+        <ul role="list" class="spotlight__list">
+          <li><Icon name="check" size={18} /> Até 30 W na saída USB-C</li>
+          <li><Icon name="check" size={18} /> Bivolt (100–240 V)</li>
+          <li><Icon name="check" size={18} /> Homologado pela Anatel</li>
+          <li><Icon name="check" size={18} /> Nas cores preta e branca</li>
+        </ul>
+        <div class="cluster">
+          <Button href="/carregador-mistertech/" variant="secondary" icon="arrow-right">Conhecer o carregador</Button>
+          <Button href="/kit-de-viagem/" variant="ghost">Ver kits de viagem</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vantagens -->
+  <section class="section section--subtle">
+    <div class="container">
+      <SectionHeader eyebrow="Por que Mistertech" title="Vantagens de ser Mistertech" align="center" />
+      <ul role="list" class="benefits">
+        <li>
+          <Feature icon="shield-check" title="Certificados e com garantia">
+            Produtos homologados, com garantia da loja e do fabricante: 12 meses contra defeitos de fabricação.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="award" title="Materiais de excelência">
+            Cabos com revestimento trançado, conectores reforçados e acabamento pensado para durar.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="pen-tool" title="Design e usabilidade">
+            Acessórios práticos, compactos e bonitos, feitos para o seu dia a dia.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="refresh" title="Trocas em até 30 dias">
+            Se precisar de troca, a gente resolve em até 30 dias corridos a partir do recebimento.
+          </Feature>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Onde comprar -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader
+        eyebrow="Onde comprar"
+        title="Compre nos parceiros oficiais"
+        lead="O site da Mistertech é um catálogo. A compra é feita com segurança nas lojas físicas e online dos nossos parceiros."
+      >
+        <Button slot="actions" href="/onde-comprar/" variant="outline" icon="arrow-right">Saiba mais</Button>
+      </SectionHeader>
+      <ul role="list" class="grid-auto stores">
+        {
+          lojas.map((l) => (
+            <li>
+              <StoreCard loja={l} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <HelpCta />
+</BaseLayout>
+
+<style>
+  /* ---------- Abertura ---------- */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(var(--space-12), 7vw, var(--space-24));
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: var(--space-12);
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .hero__grid {
+      grid-template-columns: 1.05fr 1fr;
+    }
+  }
+
+  .hero__copy {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .hero__slogan {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-muted);
+  }
+
+  .hero__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--yellow-500);
+    box-shadow: 0 0 0 4px rgb(253 195 0 / 0.2);
+  }
+
+  .hero__title {
+    font-size: clamp(2.375rem, 1.5rem + 3.6vw, 4.25rem);
+    max-width: 15ch;
+  }
+
+  .hero__highlight {
+    color: var(--yellow-500);
+  }
+
+  .hero__lead {
+    max-width: 50ch;
+  }
+
+  .hero__proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    padding-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .hero__proof li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .hero__proof :global(.icon) {
+    color: var(--yellow-500);
+  }
+
+  .hero__visual {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    max-width: 560px;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .hero__disc {
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--yellow-300), var(--yellow-500) 55%, var(--yellow-600));
+  }
+
+  .hero__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px dashed rgb(255 255 255 / 0.18);
+  }
+
+  .hero__visual :global(.hero__img) {
+    position: relative;
+    width: 96%;
+    height: auto;
+    filter: drop-shadow(0 28px 32px rgb(0 0 0 / 0.35));
+  }
+
+  .hero__chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--ink-0);
+    color: var(--ink-950);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    box-shadow: var(--shadow-lg);
+    white-space: nowrap;
+  }
+
+  .hero__chip--a {
+    top: 12%;
+    left: -2%;
+  }
+
+  .hero__chip--b {
+    bottom: 10%;
+    right: -2%;
+  }
+
+  @media (max-width: 520px) {
+    .hero__chip {
+      font-size: var(--text-xs);
+    }
+
+    .hero__chip--a {
+      left: 0;
+      top: 4%;
+    }
+
+    .hero__chip--b {
+      right: 0;
+      bottom: 4%;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__chip {
+      animation: flutuar 6s var(--ease-in-out) infinite;
+    }
+
+    .hero__chip--b {
+      animation-delay: -3s;
+    }
+  }
+
+  @keyframes flutuar {
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  /* ---------- Grades ---------- */
+  .categories {
+    --grid-min: 240px;
+    --grid-gap: var(--space-5);
+  }
+
+  .products {
+    --grid-min: 250px;
+    --grid-gap: var(--space-5);
+  }
+
+  .stores {
+    --grid-min: 240px;
+    --grid-gap: var(--space-5);
+  }
+
+  /* ---------- Produto em evidência ---------- */
+  .spotlight__grid {
+    display: grid;
+    gap: var(--space-10);
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .spotlight__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-16);
+    }
+  }
+
+  .spotlight__media {
+    position: relative;
+    border-radius: var(--radius-xl);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+
+  .spotlight__media::before {
+    content: '';
+    position: absolute;
+    left: -60px;
+    bottom: -60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: var(--yellow-500);
+  }
+
+  .spotlight__media :global(img) {
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+  }
+
+  .spotlight__copy {
+    display: grid;
+    gap: var(--space-5);
+    justify-items: start;
+  }
+
+  .spotlight__list {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .spotlight__list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: var(--weight-bold);
+  }
+
+  .spotlight__list :global(.icon) {
+    padding: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--yellow-500);
+    color: var(--ink-950);
+  }
+
+  /* ---------- Vantagens ---------- */
+  .benefits {
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+  }
+
+  .benefits li {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+</style>

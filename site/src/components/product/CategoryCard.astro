@@ -1,0 +1,130 @@
+---
+/** Card de categoria com foto, nome, quantidade e descrição. */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from '../ui/Icon.astro';
+import type { Categoria } from '../../data/categorias';
+import { url } from '../../lib/url';
+
+interface Props {
+  categoria: Categoria;
+  total: number;
+  imagem: { src: ImageMetadata; alt: string };
+}
+
+const { categoria, total, imagem } = Astro.props;
+---
+
+<article class="category-card">
+  <div class="category-card__media">
+    <Image src={imagem.src} alt="" widths={[320, 480]} sizes="(min-width: 1024px) 270px, (min-width: 640px) 45vw, 90vw" loading="lazy" />
+  </div>
+  <div class="category-card__body">
+    <span class="category-card__icon"><Icon name={categoria.icone} size={20} /></span>
+    <h3 class="category-card__title">
+      <a href={url(`/${categoria.slug}/`)} data-track="menu">{categoria.nome}</a>
+    </h3>
+    <p class="category-card__count">{total} {total === 1 ? 'produto' : 'produtos'}</p>
+    <Icon name="arrow-right" size={20} class="category-card__arrow" />
+  </div>
+</article>
+
+<style>
+  .category-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .category-card:focus-within {
+    box-shadow: var(--shadow-focus);
+  }
+
+  .category-card__media {
+    aspect-ratio: 4 / 3;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .category-card__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: var(--space-4);
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .category-card:hover .category-card__media :global(img) {
+    transform: scale(1.05);
+  }
+
+  .category-card__body {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-4) var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .category-card__icon {
+    grid-row: span 2;
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--yellow-500);
+    color: var(--ink-950);
+  }
+
+  .category-card__title {
+    font-size: var(--text-lg);
+  }
+
+  .category-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .category-card__title a:focus-visible {
+    outline: none;
+  }
+
+  .category-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .category-card__count {
+    grid-column: 2;
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  .category-card :global(.category-card__arrow) {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .category-card:hover :global(.category-card__arrow) {
+    transform: translateX(3px);
+  }
+</style>

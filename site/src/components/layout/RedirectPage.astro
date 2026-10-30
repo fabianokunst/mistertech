@@ -1,0 +1,24 @@
+---
+/** Página mínima que leva o visitante (e os buscadores) para o novo endereço. */
+import { absoluteUrl, url } from '../../lib/url';
+
+interface Props {
+  para: string;
+}
+
+const destino = url(Astro.props.para);
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Esta página mudou de endereço | Mistertech</title>
+    <meta http-equiv="refresh" content={`0;url=${destino}`} />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={absoluteUrl(Astro.props.para, Astro.site)} />
+  </head>
+  <body>
+    <p>Esta página mudou de endereço: <a href={destino}>continuar</a>.</p>
+  </body>
+</html>

@@ -1,0 +1,484 @@
+---
+/**
+ * Páginas na raiz do site, mantendo as URLs do WordPress:
+ *  - categorias: /cabos/, /carregadores/, /kit-de-viagem/, /perifericos/
+ *  - produtos:   /<slug-do-produto>/
+ *  - endereços antigos que mudaram (redirecionamentos)
+ */
+import type { GetStaticPaths } from 'astro';
+import { getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import Badge from '../components/ui/Badge.astro';
+import Icon from '../components/ui/Icon.astro';
+import Notice from '../components/ui/Notice.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import Catalog from '../components/product/Catalog.astro';
+import ProductCard from '../components/product/ProductCard.astro';
+import ProductGallery from '../components/product/ProductGallery.astro';
+import SpecTable from '../components/product/SpecTable.astro';
+import WhereToBuy from '../components/product/WhereToBuy.astro';
+import HelpCta from '../components/sections/HelpCta.astro';
+import RedirectPage from '../components/layout/RedirectPage.astro';
+import { categorias, getCategoria, type Categoria } from '../data/categorias';
+import { redirecionamentos } from '../data/redirecionamentos';
+import { site } from '../data/site';
+import { getProdutos, lojasDoProduto, relacionados, type Produto } from '../lib/produtos';
+import { absoluteUrl, url } from '../lib/url';
+import { semQuebras } from '../lib/texto';
+
+type Props =
+  | { tipo: 'categoria'; categoria: Categoria }
+  | { tipo: 'produto'; produto: Produto }
+  | { tipo: 'redirecionamento'; para: string };
+
+export const getStaticPaths = (async () => {
+  const produtos = await getProdutos();
+  return [
+    ...categorias.map((categoria) => ({
+      params: { slug: categoria.slug },
+      props: { tipo: 'categoria' as const, categoria },
+    })),
+    ...produtos.map((produto) => ({
+      params: { slug: produto.id },
+      props: { tipo: 'produto' as const, produto },
+    })),
+    ...Object.entries(redirecionamentos).map(([slug, para]) => ({
+      params: { slug },
+      props: { tipo: 'redirecionamento' as const, para },
+    })),
+  ];
+}) satisfies GetStaticPaths;
+
+const props = Astro.props;
+const todos = await getProdutos();
+
+const selos = {
+  anatel: { icone: 'shield-check', texto: 'Homologado pela Anatel' },
+  mfi: { icone: 'badge-check', texto: 'Certificação MFi (Apple)' },
+} as const;
+
+let produtoPagina: {
+  Content: Awaited<ReturnType<typeof render>>['Content'];
+  ficha: Record<string, string>;
+  jsonLd: Record<string, unknown>;
+} | null = null;
+
+if (props.tipo === 'produto') {
+  const { produto } = props;
+  const d = produto.data;
+  const { Content } = await render(produto);
+  const ficha = {
+    ...d.caracteristicas,
+    ...(d.codigo ? { Código: d.codigo } : {}),
+    ...(d.referencia ? { Referência: d.referencia } : {}),
+    ...d.tecnicas,
+    ...d.dimensoes,
+  };
+  const imagens = await Promise.all(
+    d.imagens.slice(0, 3).map((img) => getImage({ src: img.src, width: 1200, format: 'jpg' })),
+  );
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: d.nomeCompleto,
+    description: d.resumo,
+    url: absoluteUrl(`/${produto.id}/`, Astro.site),
+    image: imagens.map((i) => new URL(i.src, Astro.site).href),
+    brand: { '@type': 'Brand', name: site.nome },
+    category: getCategoria(d.categoria).nome,
+    ...(d.referencia ? { sku: d.referencia, mpn: d.referencia } : {}),
+    ...(d.codigo ? { productID: d.codigo } : {}),
+  };
+  produtoPagina = { Content, ficha, jsonLd };
+}
+---
+
+{
+  props.tipo === 'redirecionamento' ? (
+    <RedirectPage para={props.para} />
+  ) : props.tipo === 'categoria' ? (
+    <BaseLayout title={props.categoria.titulo} description={props.categoria.descricao} secao="/acessorios/">
+      <PageHeader
+        title={props.categoria.nome}
+        eyebrow="Acessórios"
+        icon={props.categoria.icone}
+        lead={props.categoria.descricao}
+        breadcrumbs={[{ label: 'Acessórios', href: '/acessorios/' }, { label: props.categoria.nome }]}
+      />
+      <section class="section section--tight">
+        <div class="container">
+          <Catalog
+            produtos={todos.filter((p) => p.data.categoria === props.categoria.slug)}
+            todos={todos}
+            ativa={props.categoria.slug}
+          />
+        </div>
+      </section>
+      <HelpCta />
+    </BaseLayout>
+  ) : (
+    (() => {
+      const { produto } = props;
+      const d = produto.data;
+      const cat = getCategoria(d.categoria);
+      const { Content, ficha, jsonLd } = produtoPagina!;
+      return (
+        <BaseLayout
+          title={d.nome}
+          description={d.resumo}
+          image={d.imagens[0].src}
+          type="product"
+          secao="/acessorios/"
+          jsonLd={jsonLd}
+        >
+          <section class="product-top">
+            <div class="container">
+              <Breadcrumbs
+                items={[
+                  { label: 'Acessórios', href: '/acessorios/' },
+                  { label: cat.nome, href: `/${cat.slug}/` },
+                  { label: d.nome },
+                ]}
+              />
+              <div class="product">
+                <ProductGallery imagens={d.imagens} />
+
+                <div class="product__info">
+                  <a href={url(`/${cat.slug}/`)} class="product__cat">
+                    <Icon name={cat.icone} size={16} />
+                    {cat.nome}
+                  </a>
+                  <h1 class="product__title" set:html={semQuebras(d.nome)} />
+                  <p class="product__full" set:html={semQuebras(d.nomeCompleto)} />
+                  <p class="lead" set:html={semQuebras(d.resumo)} />
+
+                  {d.destaques.length > 0 && (
+                    <ul role="list" class="product__tags">
+                      {d.destaques.map((t) => (
+                        <li>
+                          <Badge variant="outline">{t}</Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <WhereToBuy lojas={lojasDoProduto(produto)} />
+
+                  <ul role="list" class="product__assurances">
+                    {d.selos.map((s) => (
+                      <li>
+                        <Icon name={selos[s].icone} size={20} />
+                        {selos[s].texto}
+                      </li>
+                    ))}
+                    <li>
+                      <Icon name="circle-check" size={20} />
+                      <span>
+                        {site.garantia.total} meses de garantia ·{' '}
+                        <a href={url('/politica-de-trocas/#garantia')}>como funciona</a>
+                      </span>
+                    </li>
+                  </ul>
+
+                  {(d.codigo || d.referencia) && (
+                    <p class="product__codes">
+                      {d.codigo && <span>Cód. {d.codigo}</span>}
+                      {d.referencia && <span>Ref. {d.referencia}</span>}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section section--subtle">
+            <div class="container details">
+              <div class="details__main">
+                <h2 class="details__title">Sobre o produto</h2>
+                <div class="prose">
+                  <Content />
+                </div>
+
+                {d.especificacoes.length > 0 && (
+                  <ul role="list" class="checklist">
+                    {d.especificacoes.map((e) => (
+                      <li>
+                        <Icon name="check" size={18} />
+                        {e}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {d.compatibilidade && (
+                  <div class="details__block">
+                    <h3>Compatibilidade</h3>
+                    <p>{d.compatibilidade}</p>
+                  </div>
+                )}
+
+                {d.modoDeUso.length > 0 && (
+                  <div class="details__block">
+                    <h3>Modo de uso</h3>
+                    <ol role="list" class="steps">
+                      {d.modoDeUso.map((passo) => (
+                        <li>{passo}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+
+              <aside class="details__side">
+                <div class="card">
+                  <h2 class="card__title">Ficha técnica</h2>
+                  <SpecTable rows={ficha} />
+                </div>
+                {d.inclusos.length > 0 && (
+                  <div class="card">
+                    <h2 class="card__title">Na caixa</h2>
+                    <ul role="list" class="checklist">
+                      {d.inclusos.map((item) => (
+                        <li>
+                          <Icon name="package" size={18} />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <Notice variant="accent" icon="shield-check" title={`${site.garantia.total} meses de garantia`}>
+                  {site.garantia.legal} meses de garantia legal + {site.garantia.estendida} meses de garantia estendida contra
+                  defeitos de fabricação, a partir da emissão da nota fiscal. Não precisa cadastrar.{' '}
+                  <a href={url('/politica-de-trocas/#garantia')}>Saiba mais</a>
+                </Notice>
+              </aside>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="container">
+              <SectionHeader title="Veja também" eyebrow="Mais acessórios">
+                <a slot="actions" href={url('/acessorios/')} class="see-all">
+                  Ver todos <Icon name="arrow-right" size={18} />
+                </a>
+              </SectionHeader>
+              <ul role="list" class="grid-auto related">
+                {relacionados(produto, todos).map((p) => (
+                  <li>
+                    <ProductCard produto={p} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <HelpCta />
+        </BaseLayout>
+      );
+    })()
+  )
+}
+
+<style>
+  .product-top {
+    padding-block: var(--space-6) var(--section-space);
+  }
+
+  .product {
+    display: grid;
+    gap: var(--space-10);
+    margin-top: var(--space-6);
+  }
+
+  @media (min-width: 1024px) {
+    .product {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .product > :global(.gallery) {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+
+  .product__info {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+
+  .product__cat {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    justify-self: start;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .product__cat:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+  }
+
+  .product__title {
+    font-size: var(--text-4xl);
+    margin-top: calc(var(--space-2) * -1);
+  }
+
+  .product__full {
+    margin-top: calc(var(--space-3) * -1);
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  .product__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .product__assurances {
+    display: grid;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .product__assurances li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .product__assurances :global(.icon) {
+    color: var(--color-success);
+  }
+
+  .product__codes {
+    display: flex;
+    gap: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--color-text-subtle);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .details {
+    display: grid;
+    gap: var(--space-10);
+  }
+
+  @media (min-width: 1024px) {
+    .details {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+  }
+
+  .details__main {
+    display: grid;
+    gap: var(--space-6);
+    align-content: start;
+  }
+
+  .details__title {
+    font-size: var(--text-2xl);
+  }
+
+  .details__block {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .details__block h3 {
+    font-size: var(--text-lg);
+  }
+
+  .details__block p {
+    color: var(--color-text-muted);
+    max-width: 68ch;
+  }
+
+  .details__side {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .card {
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .card__title {
+    margin-bottom: var(--space-4);
+    font-size: var(--text-xl);
+  }
+
+  .checklist {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .checklist li {
+    display: flex;
+    gap: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  .checklist :global(.icon) {
+    margin-top: 3px;
+    color: var(--yellow-700);
+  }
+
+  .steps {
+    counter-reset: passo;
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .steps li {
+    counter-increment: passo;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: var(--space-3);
+    align-items: start;
+    color: var(--color-text-muted);
+  }
+
+  .steps li::before {
+    content: counter(passo);
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ink-950);
+    color: var(--yellow-500);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-sm);
+  }
+
+  .related {
+    --grid-min: 250px;
+    --grid-gap: var(--space-5);
+  }
+
+  .see-all {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: var(--weight-bold);
+  }
+</style>

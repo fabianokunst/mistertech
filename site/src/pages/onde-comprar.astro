@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import Feature from '../components/ui/Feature.astro';
+import Notice from '../components/ui/Notice.astro';
+import StoreCard from '../components/product/StoreCard.astro';
+import HelpCta from '../components/sections/HelpCta.astro';
+import { lojas } from '../data/lojas';
+
+const paraVoce = lojas.filter((l) => l.publico === 'Para você');
+const paraEmpresas = lojas.filter((l) => l.publico === 'Para empresas');
+---
+
+<BaseLayout
+  title="Onde comprar"
+  description="Os produtos Mistertech estão à venda na iPlace, na taQi e nos canais para empresas iPlace Corporativo e taQi Empresas, em lojas físicas e online."
+  secao="/onde-comprar/"
+>
+  <PageHeader
+    title="Onde comprar"
+    icon="store"
+    lead="Os produtos Mistertech estão nas lojas físicas e online dos nossos parceiros. Escolha a sua loja preferida e finalize a compra por lá."
+    breadcrumbs={[{ label: 'Onde comprar' }]}
+  />
+
+  <section class="section">
+    <div class="container stack" style="--stack-gap: var(--space-16)">
+      <div>
+        <SectionHeader title="Para você" lead="Compre online ou visite uma loja física." />
+        <ul role="list" class="grid-auto stores">
+          {
+            paraVoce.map((l) => (
+              <li>
+                <StoreCard loja={l} />
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <SectionHeader title="Para empresas" lead="Canais com atendimento dedicado para compras corporativas." />
+        <ul role="list" class="grid-auto stores">
+          {
+            paraEmpresas.map((l) => (
+              <li>
+                <StoreCard loja={l} />
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <Notice variant="accent" title="O site da Mistertech não vende produtos">
+        Aqui você conhece o catálogo completo. Na hora de comprar, você é levado ao site de um parceiro oficial, que cuida do
+        pagamento, da entrega e do acompanhamento do pedido.
+      </Notice>
+    </div>
+  </section>
+
+  <section class="section section--subtle">
+    <div class="container">
+      <SectionHeader title="Como funciona" align="center" />
+      <ul role="list" class="how">
+        <li>
+          <Feature icon="map-pin" title="Lojas físicas">
+            Para encontrar a loja mais próxima, use o link “Nossas lojas” no site da iPlace ou da taQi.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="package" title="Compre online e retire">
+            Em muitos produtos você pode comprar no site do parceiro e retirar em uma loja física.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="shield-check" title="Compra segura">
+            Todos os parceiros são autorizados a vender Mistertech e usam certificado digital SSL.
+          </Feature>
+        </li>
+        <li>
+          <Feature icon="truck" title="Acompanhe o pedido">
+            Entre na sua conta no site onde comprou e acesse “Meus pedidos”.
+          </Feature>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <HelpCta />
+</BaseLayout>
+
+<style>
+  .stores {
+    --grid-min: 260px;
+    --grid-gap: var(--space-5);
+  }
+
+  .how {
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+  }
+</style>

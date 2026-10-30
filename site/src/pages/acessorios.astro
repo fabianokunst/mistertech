@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import Catalog from '../components/product/Catalog.astro';
+import HelpCta from '../components/sections/HelpCta.astro';
+import { getProdutos } from '../lib/produtos';
+
+const produtos = await getProdutos();
+---
+
+<BaseLayout
+  title="Acessórios"
+  description="Cabos, carregadores, kits de viagem, mouse e teclado Mistertech. Produtos homologados, com 12 meses de garantia, à venda na iPlace e na taQi."
+  secao="/acessorios/"
+>
+  <PageHeader
+    title="Acessórios"
+    eyebrow="Catálogo Mistertech"
+    lead="Uma linha essencial para o dia a dia: cabos, carregadores e periféricos para uma rotina mais prática e segura."
+    breadcrumbs={[{ label: 'Acessórios' }]}
+  />
+  <section class="section section--tight">
+    <div class="container">
+      <Catalog produtos={produtos} todos={produtos} />
+    </div>
+  </section>
+  <HelpCta />
+</BaseLayout>

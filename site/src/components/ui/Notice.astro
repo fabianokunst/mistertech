@@ -1,0 +1,85 @@
+---
+/** Aviso em destaque dentro do conteúdo. */
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  variant?: 'neutral' | 'accent' | 'info' | 'success';
+  icon?: IconName;
+  title?: string;
+  class?: string;
+}
+
+const defaults: Record<string, IconName> = {
+  neutral: 'info',
+  accent: 'info',
+  info: 'info',
+  success: 'circle-check',
+};
+
+const { variant = 'neutral', icon = defaults[variant], title, class: className } = Astro.props;
+---
+
+<aside class:list={['notice', `notice--${variant}`, className]}>
+  <Icon name={icon} size={22} class="notice__icon" />
+  <div class="notice__body">
+    {title && <p class="notice__title">{title}</p>}
+    <div class="notice__content"><slot /></div>
+  </div>
+</aside>
+
+<style>
+  .notice {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-subtle);
+    color: var(--color-text);
+  }
+
+  .notice :global(.notice__icon) {
+    margin-top: 1px;
+  }
+
+  .notice__title {
+    font-weight: var(--weight-bold);
+    margin-bottom: var(--space-1);
+  }
+
+  .notice__content {
+    color: var(--color-text-muted);
+  }
+
+  .notice__content :global(a) {
+    font-weight: var(--weight-bold);
+  }
+
+  .notice--accent {
+    background: var(--yellow-50);
+    border-color: var(--yellow-300);
+  }
+
+  .notice--accent :global(.notice__icon) {
+    color: var(--yellow-700);
+  }
+
+  .notice--info {
+    background: var(--color-info-bg);
+    border-color: transparent;
+  }
+
+  .notice--info :global(.notice__icon) {
+    color: var(--color-info);
+  }
+
+  .notice--success {
+    background: var(--color-success-bg);
+    border-color: transparent;
+  }
+
+  .notice--success :global(.notice__icon) {
+    color: var(--color-success);
+  }
+</style>
