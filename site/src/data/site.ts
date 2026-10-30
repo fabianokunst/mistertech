@@ -17,10 +17,11 @@ export const site = {
   garantia: { total: 12, legal: 3, estendida: 9 },
 
   /**
-   * Endereço que recebe o formulário de contato (POST com FormData).
-   * Vazio: o formulário abre o aplicativo de e-mail do visitante com a mensagem pronta.
+   * Endereço que recebe o formulário de contato (POST com FormData): public/api/contato.php,
+   * que envia o e-mail pela Hostinger. Onde não há PHP (GitHub Pages, `npm run dev`) ou se
+   * ficar vazio, o formulário abre o aplicativo de e-mail do visitante com a mensagem pronta.
    */
-  formularioContato: '',
+  formularioContato: '/api/contato.php',
 
   /** SAP Emarsys (Scarab). Só carrega depois que o visitante aceita os cookies. */
   emarsys: { merchantId: '1E3705BDD586344B' },

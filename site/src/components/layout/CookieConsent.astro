@@ -80,10 +80,10 @@ import { site } from '../../data/site';
   });
 
   document.addEventListener('mt:contato', (e) => {
-    const { nome, email } = (e as CustomEvent<{ nome: string; email: string }>).detail;
+    const { nome, email, mensagem } = (e as CustomEvent<{ nome: string; email: string; mensagem: string }>).detail;
     if (!w.ScarabQueue) return;
     w.ScarabQueue.push(['setEmail', email]);
-    rastrear('tag', 'contato_formulario', { nome, email });
+    rastrear('tag', 'contato_formulario', { nome, email, mensagem });
   });
 
   function mostrar(visivel: boolean) {

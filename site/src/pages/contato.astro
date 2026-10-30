@@ -62,7 +62,14 @@ const assuntos = ['Dúvida sobre um produto', 'Troca ou garantia', 'Pedido feito
 
       <div class="form-card">
         <h2 class="form-card__title">Envie a sua mensagem</h2>
-        <form class="form" novalidate data-contact-form data-endpoint={site.formularioContato} data-email={site.email}>
+        <form
+          class="form"
+          method="post"
+          action={site.formularioContato ? url(site.formularioContato) : undefined}
+          novalidate
+          data-contact-form
+          data-email={site.email}
+        >
           <div class="form__row">
             <Field label="Nome" name="nome" required autocomplete="name" maxlength={120} />
             <Field label="E-mail" name="email" type="email" required autocomplete="email" maxlength={160} />
@@ -102,8 +109,19 @@ const assuntos = ['Dúvida sobre um produto', 'Troca ou garantia', 'Pedido feito
     status.dataset.tipo = tipo;
   }
 
+  /** Marca os campos que o servidor recusou e leva o foco ao primeiro. */
+  function marcarErros(erros: Record<string, string> = {}) {
+    form?.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    const campos = Object.keys(erros)
+      .map((nome) => form?.elements.namedItem(nome))
+      .filter((el): el is HTMLElement => el instanceof HTMLElement);
+    campos.forEach((el) => el.setAttribute('aria-invalid', 'true'));
+    campos[0]?.focus();
+  }
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    marcarErros();
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -115,30 +133,40 @@ const assuntos = ['Dúvida sobre um produto', 'Troca ou garantia', 'Pedido feito
     const email = String(dados.get('email')).trim();
     const assunto = String(dados.get('assunto'));
     const mensagem = String(dados.get('mensagem')).trim();
-    document.dispatchEvent(new CustomEvent('mt:contato', { detail: { nome, email } }));
+    // Mesmo evento do site antigo: setEmail + tag contato_formulario com nome, e-mail e mensagem.
+    document.dispatchEvent(new CustomEvent('mt:contato', { detail: { nome, email, mensagem } }));
 
-    const endpoint = form.dataset.endpoint;
+    const endpoint = form.getAttribute('action');
     const destino = form.dataset.email!;
 
-    if (!endpoint) {
-      // Sem servidor: abre o e-mail do visitante com a mensagem pronta.
+    const abrirEmail = () => {
       const corpo = `${mensagem}\n\n— ${nome} (${email})`;
       location.href = `mailto:${destino}?subject=${encodeURIComponent(`[Site] ${assunto}`)}&body=${encodeURIComponent(corpo)}`;
       mostrar(`Abrimos o seu aplicativo de e-mail com a mensagem pronta. Se ele não abrir, escreva para ${destino}.`, 'ok');
-      return;
-    }
+    };
+
+    if (!endpoint) return abrirEmail();
 
     const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     botao?.setAttribute('disabled', '');
+    form.setAttribute('aria-busy', 'true');
     try {
       const resposta = await fetch(endpoint, { method: 'POST', body: dados, headers: { Accept: 'application/json' } });
-      if (!resposta.ok) throw new Error(String(resposta.status));
-      form.reset();
-      mostrar('Mensagem enviada! Responderemos no seu e-mail o quanto antes.', 'ok');
+      // Servidor sem PHP (GitHub Pages, `npm run dev`): segue pelo e-mail do visitante.
+      if (resposta.status === 404 || resposta.status === 405) return abrirEmail();
+      const json = await resposta.json().catch(() => null);
+      if (resposta.ok && json?.ok) {
+        form.reset();
+        mostrar(json.mensagem, 'ok');
+        return;
+      }
+      marcarErros(json?.erros);
+      mostrar(json?.mensagem ?? `Não foi possível enviar agora. Tente de novo ou escreva para ${destino}.`, 'erro');
     } catch {
-      mostrar(`Não foi possível enviar agora. Tente de novo ou escreva para ${destino}.`, 'erro');
+      mostrar(`Não foi possível enviar agora. Verifique a sua conexão e tente de novo, ou escreva para ${destino}.`, 'erro');
     } finally {
       botao?.removeAttribute('disabled');
+      form.removeAttribute('aria-busy');
     }
   });
 </script>

@@ -61,5 +61,5 @@ O texto abaixo do `---` é a descrição em Markdown. O build valida os campos e
 ## Integrações
 
 - **SAP Emarsys:** só carrega depois que o visitante aceita os cookies. Eventos `menu_click`, `product_click` e `contato_formulario` mantêm os nomes do site antigo.
-- **Formulário de contato:** sem servidor configurado, abre o e-mail do visitante com a mensagem pronta. Para enviar direto, preencha `formularioContato` em `src/data/site.ts` com um endpoint que aceite POST.
+- **Formulário de contato:** como no site antigo (Elementor), o envio vai para o servidor: `public/api/contato.php` valida os campos e manda o e-mail para `contato@mistertech.com.br` pelo `mail()` da Hostinger, com Reply-To no e-mail do visitante. Tem armadilha para robôs e limite de 5 envios por IP a cada 10 minutos. Destinatário e remetente ficam no topo do arquivo. Onde não há PHP (GitHub Pages, `npm run dev`), o formulário abre o e-mail do visitante com a mensagem pronta. Para testar o envio localmente: `npm run build` e a configuração `site-php` de `.claude/launch.json` (`php -S` em `dist/`, mandando para um SMTP de teste em `127.0.0.1:2525`).
 - **URLs antigas:** `src/data/redirecionamentos.ts` (páginas de redirecionamento) e `public/.htaccess` (301 na Hostinger). Mantenha os dois em sincronia.

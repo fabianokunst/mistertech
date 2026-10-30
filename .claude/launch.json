@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "site", "run", "dev", "--", "--port", "4321"],
       "port": 4321
+    },
+    {
+      "name": "site-php",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["-S", "127.0.0.1:8080", "-t", "site/dist", "-d", "SMTP=127.0.0.1", "-d", "smtp_port=2525"],
+      "port": 8080
     }
   ]
 }

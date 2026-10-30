@@ -136,7 +136,8 @@ const hintId = hint ? `${id}-dica` : undefined;
     box-shadow: var(--shadow-focus);
   }
 
-  .field__control:user-invalid {
+  .field__control:user-invalid,
+  .field__control[aria-invalid='true'] {
     border-color: var(--color-danger);
   }
 
