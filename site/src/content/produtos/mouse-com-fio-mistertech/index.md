@@ -1,5 +1,6 @@
 ---
 slug: mouse-com-fio-mistertech
+idWordpress: 2937
 nome: Mouse com Fio
 nomeCompleto: Mouse com fio Mistertech, Preto
 categoria: perifericos

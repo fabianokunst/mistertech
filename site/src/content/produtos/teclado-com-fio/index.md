@@ -1,5 +1,6 @@
 ---
 slug: teclado-com-fio
+idWordpress: 2933
 nome: Teclado com Fio
 nomeCompleto: Teclado com fio Mistertech, Preto
 categoria: perifericos

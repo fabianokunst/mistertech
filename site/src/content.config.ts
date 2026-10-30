@@ -12,6 +12,8 @@ const produtos = defineCollection({
     z.object({
       /** Define a URL do produto: /<slug>/ (igual ao site antigo). */
       slug: z.string(),
+      /** ID do produto no WordPress antigo: vai no evento product_click da Emarsys, para manter o histórico. */
+      idWordpress: z.number().optional(),
       nome: z.string(),
       nomeCompleto: z.string(),
       categoria: z.enum(['cabos', 'carregadores', 'kit-de-viagem', 'perifericos']),

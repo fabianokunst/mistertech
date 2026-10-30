@@ -1,5 +1,6 @@
 ---
 slug: kit-de-viagem-lightning
+idWordpress: 2922
 nome: Kit de Viagem Lightning
 nomeCompleto: Kit de Viagem Lightning, Mistertech, Branco
 categoria: kit-de-viagem

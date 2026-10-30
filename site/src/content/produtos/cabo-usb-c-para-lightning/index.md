@@ -1,5 +1,6 @@
 ---
 slug: cabo-usb-c-para-lightning
+idWordpress: 2941
 nome: Cabo USB-C para Lightning
 nomeCompleto: Cabo USB-C para Lightning, 1,5 metros, Mistertech, Branco
 categoria: cabos

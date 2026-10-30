@@ -90,7 +90,10 @@ const assuntos = ['Dúvida sobre um produto', 'Troca ou garantia', 'Pedido feito
           </div>
           <div class="form__footer">
             <Button type="submit" size="lg" icon="arrow-right">Enviar mensagem</Button>
-            <p class="form__note">Seus dados são usados só para responder a esta mensagem.</p>
+            <p class="form__note">
+              Seus dados são usados só para responder a esta mensagem.{' '}
+              <a href={url('/politica-de-privacidade/')}>Política de privacidade</a>
+            </p>
           </div>
           <p class="form__status" role="status" aria-live="polite" data-status></p>
         </form>
@@ -133,8 +136,8 @@ const assuntos = ['Dúvida sobre um produto', 'Troca ou garantia', 'Pedido feito
     const email = String(dados.get('email')).trim();
     const assunto = String(dados.get('assunto'));
     const mensagem = String(dados.get('mensagem')).trim();
-    // Mesmo evento do site antigo: setEmail + tag contato_formulario com nome, e-mail e mensagem.
-    document.dispatchEvent(new CustomEvent('mt:contato', { detail: { nome, email, mensagem } }));
+    // Tag contato_formulario da Emarsys (se o visitante aceitou cookies): só o assunto, sem dados pessoais.
+    document.dispatchEvent(new CustomEvent('mt:contato', { detail: { assunto } }));
 
     const endpoint = form.getAttribute('action');
     const destino = form.dataset.email!;
@@ -152,8 +155,10 @@ const assuntos = ['Dúvida sobre um produto', 'Troca ou garantia', 'Pedido feito
     form.setAttribute('aria-busy', 'true');
     try {
       const resposta = await fetch(endpoint, { method: 'POST', body: dados, headers: { Accept: 'application/json' } });
-      // Servidor sem PHP (GitHub Pages, `npm run dev`): segue pelo e-mail do visitante.
-      if (resposta.status === 404 || resposta.status === 405) return abrirEmail();
+      // Servidor sem PHP: o GitHub Pages responde 404/405 e o `npm run dev` devolve o próprio
+      // arquivo .php (200, sem JSON). Nos dois casos, segue pelo e-mail do visitante.
+      const semPhp = !resposta.headers.get('content-type')?.includes('application/json');
+      if (resposta.status === 404 || resposta.status === 405 || semPhp) return abrirEmail();
       const json = await resposta.json().catch(() => null);
       if (resposta.ok && json?.ok) {
         form.reset();

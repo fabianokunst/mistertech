@@ -23,8 +23,23 @@ export const site = {
    */
   formularioContato: '/api/contato.php',
 
-  /** SAP Emarsys (Scarab). Só carrega depois que o visitante aceita os cookies. */
-  emarsys: { merchantId: '1E3705BDD586344B' },
+  /**
+   * SAP Emarsys (Scarab). Só carrega depois que o visitante aceita os cookies e só no
+   * domínio de produção: o GitHub Pages (testes) não manda visitas para a conta real.
+   */
+  emarsys: { merchantId: '1E3705BDD586344B', dominio: 'mistertech.com.br' },
+
+  /** Política de privacidade (/politica-de-privacidade/). */
+  privacidade: {
+    /**
+     * Aumente quando a política ou as ferramentas que usam cookies mudarem:
+     * o aviso de cookies volta a aparecer para todo mundo.
+     */
+    versao: 1,
+    atualizadaEm: '2026-10-30',
+    /** Encarregado pelo tratamento de dados (DPO) do Grupo Herval. Obrigatório pela LGPD (art. 41). */
+    encarregado: { nome: '', email: '' },
+  },
 } as const;
 
 export const navegacao = [

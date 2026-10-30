@@ -15,7 +15,7 @@ interface Props {
 }
 
 const { produto, as: Tag = 'h3', eager = false } = Astro.props;
-const { nome, resumo, destaques, imagens, categoria, referencia } = produto.data;
+const { nome, resumo, destaques, imagens, categoria, referencia, idWordpress } = produto.data;
 const cat = getCategoria(categoria);
 const capa = imagens[0];
 ---
@@ -37,7 +37,7 @@ const capa = imagens[0];
         href={url(`/${produto.id}/`)}
         class="product-card__link"
         data-track="produto"
-        data-id={produto.id}
+        data-id={idWordpress ?? produto.id}
         data-sku={referencia}
         data-name={nome}
         set:html={semQuebras(nome)}

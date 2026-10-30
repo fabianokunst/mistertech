@@ -74,10 +74,13 @@ const ano = new Date().getFullYear();
       <p>
         © {ano} Mistertech. Uma marca do {site.grupo.nome} · CNPJ {site.grupo.cnpj}
       </p>
-      <button type="button" class="site-footer__cookies" data-open-consent>
-        <Icon name="cookie" size={16} />
-        Preferências de cookies
-      </button>
+      <div class="site-footer__legal">
+        <a href={url('/politica-de-privacidade/')}>Política de privacidade</a>
+        <button type="button" class="site-footer__cookies" data-open-consent>
+          <Icon name="cookie" size={16} />
+          Preferências de cookies
+        </button>
+      </div>
     </div>
   </div>
 </footer>
@@ -184,6 +187,21 @@ const ano = new Date().getFullYear();
     gap: var(--space-4);
     padding-top: var(--space-6);
     color: var(--color-text-subtle);
+  }
+
+  .site-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-6);
+  }
+
+  .site-footer__legal a {
+    color: var(--color-text-muted);
+  }
+
+  .site-footer__legal a:hover {
+    color: var(--color-text);
   }
 
   .site-footer__cookies {

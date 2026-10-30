@@ -1,55 +1,107 @@
 ---
 /**
  * Consentimento de cookies (LGPD) + SAP Emarsys.
- * O script da Emarsys só é carregado depois que o visitante aceita.
- * A escolha fica no localStorage; o link do rodapé reabre o aviso.
+ * - Nada da Emarsys carrega antes do aceite; recusar tem o mesmo peso que aceitar.
+ * - A escolha fica no localStorage com data e versão da política. Vale por 12 meses
+ *   ou até a versão mudar (site.privacidade.versao); depois disso o aviso volta.
+ * - Sem consentimento válido, os cookies e dados que a Emarsys gravou são apagados.
+ * - O botão "Preferências de cookies" (rodapé e política) reabre o aviso.
  */
 import Button from '../ui/Button.astro';
 import Icon from '../ui/Icon.astro';
 import { site } from '../../data/site';
+import { url } from '../../lib/url';
+
+const merchant = Astro.site?.hostname === site.emarsys.dominio ? site.emarsys.merchantId : '';
 ---
 
-<div class="consent" role="region" aria-label="Aviso de cookies" hidden data-consent data-merchant={site.emarsys.merchantId}>
+<div
+  class="consent"
+  role="region"
+  aria-labelledby="consent-titulo"
+  tabindex="-1"
+  hidden
+  data-consent
+  data-merchant={merchant}
+  data-versao={site.privacidade.versao}
+>
   <div class="consent__body">
     <Icon name="cookie" size={24} class="consent__icon" />
     <div>
-      <p class="consent__title">Cookies</p>
+      <p class="consent__title" id="consent-titulo">Cookies e privacidade</p>
       <p class="consent__text">
-        Usamos cookies para entender como o site é usado e mostrar ofertas mais relevantes. Você pode aceitar ou recusar —
-        o site funciona do mesmo jeito.
+        Com a sua permissão, usamos cookies do SAP Emarsys para entender como o site é usado e personalizar conteúdo e
+        ofertas do {site.grupo.nome}. Se recusar, nada disso é ativado e o site funciona do mesmo jeito. Você pode mudar de
+        ideia quando quiser em “Preferências de cookies”, no rodapé.
       </p>
+      <a class="consent__link" href={url('/politica-de-privacidade/#cookies')}>Saiba mais na política de privacidade</a>
     </div>
   </div>
   <div class="consent__actions">
-    <Button size="sm" variant="outline" data-consent-choice="recusado">Recusar</Button>
-    <Button size="sm" variant="primary" data-consent-choice="aceito">Aceitar</Button>
+    <Button size="sm" variant="secondary" data-consent-choice="recusado">Recusar</Button>
+    <Button size="sm" variant="secondary" data-consent-choice="aceito">Aceitar</Button>
   </div>
 </div>
 
 <script>
   type Scarab = unknown[] & { push: (...args: unknown[]) => number };
   type Window = typeof globalThis & { ScarabQueue?: Scarab };
+  type Escolha = 'aceito' | 'recusado';
+  type Registro = { escolha: Escolha; versao: number; data: string };
 
   const CHAVE = 'mt-consentimento';
+  const VALIDADE_DIAS = 365;
+  /** Cookies e chaves de armazenamento que a Emarsys grava no domínio do site. */
+  const DADOS_EMARSYS = /^scarab/i;
+
   const banner = document.querySelector<HTMLElement>('[data-consent]');
   const merchant = banner?.dataset.merchant ?? '';
+  const versao = Number(banner?.dataset.versao ?? 1);
   const w = window as Window;
+  let quemAbriu: HTMLElement | null = null;
 
-  const ler = () => {
+  /** Escolha ainda válida: mesma versão da política e dentro do prazo. Senão, null. */
+  function ler(): Escolha | null {
     try {
-      return localStorage.getItem(CHAVE);
+      const registro = JSON.parse(localStorage.getItem(CHAVE) ?? 'null') as Registro | null;
+      if (!registro || registro.versao !== versao) return null;
+      const dias = (Date.now() - Date.parse(registro.data)) / 86_400_000;
+      if (!(dias >= 0 && dias < VALIDADE_DIAS)) return null;
+      return registro.escolha === 'aceito' || registro.escolha === 'recusado' ? registro.escolha : null;
     } catch {
       return null;
     }
-  };
+  }
 
-  const gravar = (valor: string) => {
+  function gravar(escolha: Escolha) {
+    const registro: Registro = { escolha, versao, data: new Date().toISOString() };
     try {
-      localStorage.setItem(CHAVE, valor);
+      localStorage.setItem(CHAVE, JSON.stringify(registro));
     } catch {
       /* navegação privada: vale só para esta página */
     }
-  };
+  }
+
+  /** Apaga o que a Emarsys gravou no domínio do site (cookies, localStorage e sessionStorage). */
+  function apagarDadosEmarsys() {
+    const partes = location.hostname.split('.');
+    const dominios = ['', ...partes.slice(0, -1).map((_, i) => `; domain=.${partes.slice(i).join('.')}`)];
+    document.cookie
+      .split(';')
+      .map((c) => c.split('=')[0].trim())
+      .filter((nome) => DADOS_EMARSYS.test(nome))
+      .forEach((nome) => dominios.forEach((d) => (document.cookie = `${nome}=; max-age=0; path=/${d}`)));
+    for (const armazenamento of ['localStorage', 'sessionStorage'] as const) {
+      try {
+        const loja = window[armazenamento];
+        Object.keys(loja)
+          .filter((chave) => DADOS_EMARSYS.test(chave))
+          .forEach((chave) => loja.removeItem(chave));
+      } catch {
+        /* armazenamento bloqueado */
+      }
+    }
+  }
 
   function carregarEmarsys() {
     if (!merchant || document.getElementById('scarab-js-api')) return;
@@ -62,7 +114,7 @@ import { site } from '../../data/site';
     w.ScarabQueue.push(['go']);
   }
 
-  /** Eventos personalizados (mesmos nomes do site antigo). */
+  /** Eventos personalizados (mesmos nomes do site antigo). Só funcionam depois do aceite. */
   function rastrear(...comando: unknown[]) {
     if (!w.ScarabQueue) return;
     w.ScarabQueue.push(comando);
@@ -79,32 +131,48 @@ import { site } from '../../data/site';
     }
   });
 
+  // Só o assunto: nome, e-mail e mensagem não vão para a Emarsys. O consentimento de
+  // cookies não cobre identificar a pessoa para marketing, e o formulário promete
+  // usar os dados só para responder.
   document.addEventListener('mt:contato', (e) => {
-    const { nome, email, mensagem } = (e as CustomEvent<{ nome: string; email: string; mensagem: string }>).detail;
-    if (!w.ScarabQueue) return;
-    w.ScarabQueue.push(['setEmail', email]);
-    rastrear('tag', 'contato_formulario', { nome, email, mensagem });
+    const { assunto } = (e as CustomEvent<{ assunto: string }>).detail;
+    rastrear('tag', 'contato_formulario', { assunto });
   });
 
-  function mostrar(visivel: boolean) {
-    if (banner) banner.hidden = !visivel;
+  function abrir(origem: HTMLElement | null) {
+    if (!banner) return;
+    quemAbriu = origem;
+    banner.hidden = false;
+    if (origem) banner.focus();
+  }
+
+  function fechar() {
+    if (!banner) return;
+    banner.hidden = true;
+    quemAbriu?.focus();
+    quemAbriu = null;
   }
 
   banner?.querySelectorAll<HTMLButtonElement>('[data-consent-choice]').forEach((botao) => {
     botao.addEventListener('click', () => {
-      const escolha = botao.dataset.consentChoice!;
+      const escolha = botao.dataset.consentChoice as Escolha;
       gravar(escolha);
-      mostrar(false);
-      if (escolha === 'aceito') carregarEmarsys();
-      else if (document.getElementById('scarab-js-api')) location.reload();
+      fechar();
+      if (escolha === 'aceito') return carregarEmarsys();
+      apagarDadosEmarsys();
+      // O script já rodou nesta página: recarrega para tirá-lo da memória.
+      if (document.getElementById('scarab-js-api')) location.reload();
     });
   });
 
-  document.querySelectorAll('[data-open-consent]').forEach((el) => el.addEventListener('click', () => mostrar(true)));
+  document
+    .querySelectorAll<HTMLElement>('[data-open-consent]')
+    .forEach((el) => el.addEventListener('click', () => abrir(el)));
 
   const atual = ler();
   if (atual === 'aceito') carregarEmarsys();
-  else if (atual === null) mostrar(true);
+  else apagarDadosEmarsys();
+  if (atual === null) abrir(null);
 </script>
 
 <style>
@@ -116,7 +184,7 @@ import { site } from '../../data/site';
     z-index: var(--z-overlay);
     display: grid;
     gap: var(--space-4);
-    max-width: 440px;
+    max-width: 460px;
     padding: var(--space-5);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -129,12 +197,18 @@ import { site } from '../../data/site';
     display: none;
   }
 
+  .consent:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
   .consent__body {
     display: flex;
     gap: var(--space-3);
   }
 
   .consent :global(.consent__icon) {
+    flex-shrink: 0;
     color: var(--yellow-700);
   }
 
@@ -148,9 +222,17 @@ import { site } from '../../data/site';
     color: var(--color-text-muted);
   }
 
+  .consent__link {
+    display: inline-block;
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: var(--color-text);
+  }
+
   .consent__actions {
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-2);
   }
 

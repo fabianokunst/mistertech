@@ -1,5 +1,6 @@
 ---
 slug: carregador-mistertech
+idWordpress: 492
 nome: Carregador de Parede 30 W
 nomeCompleto: Carregador de Parede Mistertech, Universal, USB-C/USB, 30 W
 categoria: carregadores

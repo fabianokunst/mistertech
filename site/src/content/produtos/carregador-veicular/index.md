@@ -1,5 +1,6 @@
 ---
 slug: carregador-veicular
+idWordpress: 2938
 nome: Carregador Veicular
 nomeCompleto: Carregador Veicular Mistertech, 2 saídas
 categoria: carregadores

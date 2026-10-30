@@ -1,0 +1,420 @@
+---
+/**
+ * Política de privacidade e de cookies (LGPD, arts. 9º, 18 e 41).
+ * Data, versão e encarregado ficam em site.privacidade (src/data/site.ts).
+ * Ao mudar o que está aqui, atualize `atualizadaEm` e, se mudar o uso de cookies,
+ * aumente `versao` para o aviso de cookies aparecer de novo.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import Button from '../components/ui/Button.astro';
+import Notice from '../components/ui/Notice.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+const { encarregado, atualizadaEm } = site.privacidade;
+const faltaEncarregado = !encarregado.nome || !encarregado.email;
+if (faltaEncarregado) {
+  console.warn('[politica-de-privacidade] Preencha site.privacidade.encarregado (nome e e-mail) em src/data/site.ts.');
+}
+
+const data = new Date(`${atualizadaEm}T12:00:00`).toLocaleDateString('pt-BR', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const indice = [
+  { id: 'quem-somos', titulo: 'Quem cuida dos seus dados' },
+  { id: 'dados', titulo: 'Que dados usamos e para quê' },
+  { id: 'cookies', titulo: 'Cookies' },
+  { id: 'compartilhamento', titulo: 'Com quem compartilhamos' },
+  { id: 'prazos', titulo: 'Por quanto tempo guardamos' },
+  { id: 'direitos', titulo: 'Seus direitos' },
+  { id: 'encarregado', titulo: 'Encarregado de dados' },
+  { id: 'alteracoes', titulo: 'Alterações' },
+];
+
+const tratamentos = [
+  {
+    quando: 'Você escreve pelo formulário de contato',
+    dados: 'Nome, e-mail, assunto, mensagem e endereço IP',
+    finalidade: 'Responder à sua mensagem. O IP serve para barrar envios em massa e abusos.',
+    base: 'Legítimo interesse em atender o seu pedido e proteger o site (art. 7º, IX)',
+  },
+  {
+    quando: 'Você aceita os cookies',
+    dados: 'Identificador aleatório do navegador, páginas visitadas, cliques em menus e produtos, data e hora, tipo de navegador e dispositivo',
+    finalidade: `Entender como o site é usado e personalizar conteúdo e ofertas do ${site.grupo.nome}, com o SAP Emarsys.`,
+    base: 'Consentimento (art. 7º, I), que você pode revogar a qualquer momento',
+  },
+  {
+    quando: 'Você responde ao aviso de cookies',
+    dados: 'A sua escolha, a data e a versão desta política',
+    finalidade: 'Lembrar a sua escolha e comprovar o consentimento.',
+    base: 'Cumprimento de obrigação legal (art. 7º, II, e art. 8º, § 2º)',
+  },
+  {
+    quando: 'Você acessa qualquer página',
+    dados: 'Endereço IP, data e hora, página acessada e navegador (registros do servidor)',
+    finalidade: 'Segurança e funcionamento do site.',
+    base: 'Obrigação legal de guardar registros de acesso (Marco Civil da Internet, art. 15)',
+  },
+];
+
+const cookies = [
+  {
+    nome: 'mt-consentimento',
+    onde: 'Armazenamento local do navegador',
+    para: 'Guarda a sua escolha sobre cookies.',
+    duracao: '12 meses (depois disso, perguntamos de novo)',
+    tipo: 'Necessário',
+  },
+  {
+    nome: 'scarab.visitor',
+    onde: 'Cookie de sessão e armazenamento local do navegador',
+    para: 'Identificador aleatório do SAP Emarsys para reconhecer o navegador entre visitas.',
+    duracao: 'Até você recusar os cookies ou o consentimento vencer; aí é apagado',
+    tipo: 'Só com consentimento',
+  },
+  {
+    nome: 'Cookies em scarabresearch.com',
+    onde: 'Cookies do próprio SAP Emarsys (terceiro)',
+    para: 'Recomendações e campanhas do SAP Emarsys.',
+    duracao: 'Definida pelo SAP Emarsys. Você pode apagá-los nas configurações do navegador',
+    tipo: 'Só com consentimento',
+  },
+];
+---
+
+<BaseLayout
+  title="Política de privacidade"
+  description={`Como a Mistertech (${site.grupo.nome}) usa dados pessoais e cookies no site, com quem compartilha e como exercer os seus direitos pela LGPD.`}
+>
+  <PageHeader
+    title="Política de privacidade"
+    icon="shield-check"
+    lead="Como usamos os seus dados e os cookies neste site, e o que você pode fazer a respeito."
+    breadcrumbs={[{ label: 'Política de privacidade' }]}
+  >
+    <p class="updated">Atualizada em {data}.</p>
+  </PageHeader>
+
+  <section class="section">
+    <div class="container policy">
+      <nav class="policy__toc" aria-label="Nesta página">
+        <p class="eyebrow">Nesta página</p>
+        <ol role="list">
+          {
+            indice.map((item) => (
+              <li>
+                <a href={`#${item.id}`}>{item.titulo}</a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <div class="policy__body">
+        <section id="quem-somos" class="policy__section">
+          <h2>Quem cuida dos seus dados</h2>
+          <p class="text">
+            A Mistertech é uma marca do <strong>{site.grupo.nome}</strong> (CNPJ {site.grupo.cnpj}), que é o controlador dos
+            dados pessoais tratados neste site, nos termos da Lei Geral de Proteção de Dados (Lei 13.709/2018, a LGPD).
+          </p>
+          <p class="text">
+            Este site é institucional: não vendemos pelo site e não pedimos cadastro. As compras são feitas nas{' '}
+            <a href={url('/onde-comprar/')}>lojas parceiras</a>, que têm políticas de privacidade próprias.
+          </p>
+        </section>
+
+        <section id="dados" class="policy__section">
+          <h2>Que dados usamos e para quê</h2>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Quando</th>
+                  <th scope="col">Dados</th>
+                  <th scope="col">Para quê</th>
+                  <th scope="col">Base legal (LGPD)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  tratamentos.map((t) => (
+                    <tr>
+                      <th scope="row">{t.quando}</th>
+                      <td>{t.dados}</td>
+                      <td>{t.finalidade}</td>
+                      <td>{t.base}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="text">
+            Não usamos Google Analytics, Meta Pixel nem outras ferramentas de rastreamento além das listadas aqui. As fontes e
+            imagens do site são servidas pelo próprio site, sem chamadas a terceiros. Os links para Instagram, Facebook e lojas
+            parceiras só levam você até esses sites quando você clica.
+          </p>
+        </section>
+
+        <section id="cookies" class="policy__section">
+          <h2>Cookies</h2>
+          <p class="text">
+            Cookies são pequenos arquivos que o site guarda no seu navegador. Nada além do necessário é gravado antes da sua
+            escolha no aviso de cookies. Se você recusar, o site funciona do mesmo jeito.
+          </p>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Nome</th>
+                  <th scope="col">Onde fica</th>
+                  <th scope="col">Para quê</th>
+                  <th scope="col">Duração</th>
+                  <th scope="col">Tipo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  cookies.map((c) => (
+                    <tr>
+                      <th scope="row">
+                        <code>{c.nome}</code>
+                      </th>
+                      <td>{c.onde}</td>
+                      <td>{c.para}</td>
+                      <td>{c.duracao}</td>
+                      <td>{c.tipo}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+          <Notice icon="cookie" title="Mudar a sua escolha">
+            <p>
+              Você pode aceitar ou recusar a qualquer momento. Ao recusar, paramos de coletar e apagamos do seu navegador o que
+              o SAP Emarsys tinha gravado no nosso domínio.
+            </p>
+            <Button size="sm" variant="secondary" class="notice-btn" data-open-consent>Preferências de cookies</Button>
+          </Notice>
+        </section>
+
+        <section id="compartilhamento" class="policy__section">
+          <h2>Com quem compartilhamos</h2>
+          <p class="text">Não vendemos dados pessoais. Eles passam apenas pelos fornecedores que fazem o site funcionar:</p>
+          <ul role="list" class="list">
+            <li>
+              <strong>SAP Emarsys</strong>: análise de navegação e personalização, só se você aceitar os cookies.
+            </li>
+            <li><strong>Hostinger</strong>: hospedagem do site e registros de acesso.</li>
+            <li><strong>Microsoft (Microsoft 365)</strong>: caixa de e-mail que recebe as mensagens do formulário.</li>
+          </ul>
+          <p class="text">
+            Esses fornecedores podem tratar dados em servidores fora do Brasil, nas condições previstas no art. 33 da LGPD.
+            Também podemos compartilhar dados quando a lei ou uma autoridade exigir.
+          </p>
+        </section>
+
+        <section id="prazos" class="policy__section">
+          <h2>Por quanto tempo guardamos</h2>
+          <ul role="list" class="list">
+            <li>
+              <strong>Mensagens do formulário:</strong> pelo tempo necessário para atender o seu pedido e cumprir obrigações
+              legais.
+            </li>
+            <li>
+              <strong>Escolha sobre cookies:</strong> 12 meses. Depois disso, ou se esta política mudar, perguntamos de novo.
+            </li>
+            <li>
+              <strong>Dados do SAP Emarsys:</strong> enquanto o consentimento valer. Para apagar o que já foi coletado, fale
+              com o encarregado.
+            </li>
+            <li><strong>Registros de acesso:</strong> 6 meses, como exige o Marco Civil da Internet.</li>
+          </ul>
+        </section>
+
+        <section id="direitos" class="policy__section">
+          <h2>Seus direitos</h2>
+          <p class="text">Pela LGPD (art. 18), você pode pedir a qualquer momento:</p>
+          <ul role="list" class="list">
+            <li>Confirmação de que tratamos dados seus e acesso a eles;</li>
+            <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
+            <li>Anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desacordo com a lei;</li>
+            <li>Portabilidade dos dados a outro fornecedor;</li>
+            <li>Eliminação dos dados tratados com o seu consentimento e informação sobre com quem os compartilhamos;</li>
+            <li>Revogação do consentimento e oposição a tratamentos feitos sem ele.</li>
+          </ul>
+          <p class="text">
+            Para isso, escreva para o encarregado (abaixo). Você também pode reclamar na{' '}
+            <a href="https://www.gov.br/anpd" target="_blank" rel="noopener"
+              >Autoridade Nacional de Proteção de Dados (ANPD)<span class="visually-hidden"> (abre em nova aba)</span></a
+            >.
+          </p>
+        </section>
+
+        <section id="encarregado" class="policy__section">
+          <h2>Encarregado de dados</h2>
+          {
+            faltaEncarregado ? (
+              <Notice variant="accent" title="Preencher antes de publicar">
+                Nome e e-mail do encarregado (DPO) do {site.grupo.nome}: <code>site.privacidade.encarregado</code> em{' '}
+                <code>src/data/site.ts</code>.
+              </Notice>
+            ) : (
+              <p class="text">
+                Encarregado pelo tratamento de dados pessoais do {site.grupo.nome}: <strong>{encarregado.nome}</strong>,
+                pelo e-mail <a href={`mailto:${encarregado.email}`}>{encarregado.email}</a>.
+              </p>
+            )
+          }
+          <p class="text">
+            Dúvidas sobre produtos, trocas e garantia continuam no <a href={`mailto:${site.email}`}>{site.email}</a>.
+          </p>
+        </section>
+
+        <section id="alteracoes" class="policy__section">
+          <h2>Alterações</h2>
+          <p class="text">
+            Podemos atualizar esta política quando o site ou a lei mudarem. A data no topo da página mostra a última versão.
+            Se mudarmos o uso de cookies, o aviso aparece de novo para você decidir.
+          </p>
+        </section>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .updated {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-text-subtle);
+  }
+
+  .policy {
+    display: grid;
+    gap: var(--space-10);
+  }
+
+  @media (min-width: 1024px) {
+    .policy {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .policy__toc {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+
+  .policy__toc ol {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    border-left: 2px solid var(--color-border);
+  }
+
+  .policy__toc a {
+    display: block;
+    padding: var(--space-2) var(--space-4);
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .policy__toc a:hover {
+    color: var(--color-text);
+    border-left-color: var(--color-accent);
+  }
+
+  .policy__body {
+    display: grid;
+    gap: var(--space-12);
+    max-width: 860px;
+    min-width: 0;
+  }
+
+  .policy__section {
+    display: grid;
+    gap: var(--space-5);
+    scroll-margin-top: calc(var(--header-height) + var(--space-6));
+  }
+
+  .policy__section h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .text {
+    color: var(--color-text-muted);
+    font-size: var(--text-md);
+  }
+
+  .text strong,
+  .list strong {
+    color: var(--color-text);
+  }
+
+  .list {
+    display: grid;
+    gap: var(--space-3);
+    padding-left: var(--space-5);
+    list-style: disc;
+    color: var(--color-text-muted);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .table th,
+  .table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  .table thead th {
+    background: var(--color-bg-subtle);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .table tbody th {
+    font-weight: var(--weight-bold);
+    color: var(--color-text);
+  }
+
+  .table td {
+    color: var(--color-text-muted);
+  }
+
+  .policy :global(.notice-btn) {
+    margin-top: var(--space-3);
+  }
+</style>

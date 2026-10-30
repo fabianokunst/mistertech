@@ -1,5 +1,6 @@
 ---
 slug: cabo-usb-a-para-usb-c
+idWordpress: 2943
 nome: Cabo USB-A para USB-C
 nomeCompleto: Cabo USB-A para USB-C, 1,5 metros, Mistertech, Preto
 categoria: cabos

@@ -1,5 +1,6 @@
 ---
 slug: kit-viagem-usb-c-mistertech
+idWordpress: 2948
 nome: Kit de Viagem USB-C
 nomeCompleto: Kit de Viagem USB-C, Mistertech, Preto
 categoria: kit-de-viagem

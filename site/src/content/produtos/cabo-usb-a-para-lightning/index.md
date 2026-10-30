@@ -1,5 +1,6 @@
 ---
 slug: cabo-usb-a-para-lightning
+idWordpress: 2939
 nome: Cabo USB-A para Lightning
 nomeCompleto: Cabo USB-A para Lightning, 1,5 metros, Mistertech, Branco
 categoria: cabos
